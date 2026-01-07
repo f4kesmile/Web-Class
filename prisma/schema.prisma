@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum AgendaType {
+  ASSIGNMENT
+  EXAM
+  EVENT
+  OTHER
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+
+  role     String   @default("user")
+  isBanned Boolean  @default(false)
+  officer  Officer?
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?   @db.Text
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+model Agenda {
+  id          String     @id @default(cuid())
+  title       String
+  subject     String?
+  description String?    @db.Text
+  deadline    DateTime
+  type        AgendaType @default(ASSIGNMENT)
+
+  createdBy String
+  createdAt DateTime @default(now())
+}
+
+// Jadwal Kuliah
+model Schedule {
+  id        String    @id @default(cuid())
+  day       DayOfWeek
+  startTime String
+  endTime   String
+  subject   String
+  lecturer  String?
+  room      String?
+  credits   Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Galeri Kelas
+model Gallery {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  caption   String?
+  eventDate DateTime @default(now())
+
+  createdAt DateTime @default(now())
+}
+
+// Struktur Pengurus Kelas
+model Officer {
+  id           String @id @default(cuid())
+  position     String
+  displayOrder Int    @default(99)
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model SiteSettings {
+  id           String  @id @default(cuid())
+  className    String  @default("Informatika 4C")
+  semester     String  @default("4")
+  announcement String? @db.Text
+
+  updatedAt DateTime @updatedAt
+}
