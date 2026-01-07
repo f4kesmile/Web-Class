@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { GridBackground } from "@/components/ui/grid-background";
@@ -17,7 +16,6 @@ export default function RootLayout({
     <html lang="id">
       <body className="min-h-screen bg-background text-foreground">
         <GridBackground>
-          {/* seluruh aplikasi di-render di atas grid */}
           <div className="min-h-screen flex flex-col">{children}</div>
         </GridBackground>
       </body>

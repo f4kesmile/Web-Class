@@ -2,12 +2,21 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
 import nodemailer from "nodemailer";
-import type { User } from "@prisma/client"; 
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "mysql", 
   }),
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "user",
+        input: false,
+      },
+    },
+  },
   emailAndPassword: {  
     enabled: true,
     requireEmailVerification: false, 

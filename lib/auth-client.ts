@@ -1,12 +1,9 @@
 import { createAuthClient } from "better-auth/react";
 
-// 1. Buat client
 export const authClient = createAuthClient({
-  baseURL: "http://localhost:3000", // Sesuaikan dengan URL project Anda
+  baseURL: "http://localhost:3000",
 });
 
-// 2. Definisi Tipe Manual (Hack agar TS tidak error)
-// Kita memberi tahu TS: "Hei, authClient ini punya fungsi forgetPassword lho!"
 type AuthClientType = typeof authClient & {
   forgetPassword: (
     data: { email: string; redirectTo: string },
@@ -24,7 +21,6 @@ type AuthClientType = typeof authClient & {
   ) => Promise<void>;
 };
 
-// 3. Cast dan Export
 const client = authClient as AuthClientType;
 
 export const { 
@@ -32,6 +28,6 @@ export const {
   signUp, 
   useSession, 
   signOut, 
-  forgetPassword, // Sekarang ini tidak akan merah lagi
-  resetPassword   // Ini juga aman
+  forgetPassword,
+  resetPassword
 } = client;

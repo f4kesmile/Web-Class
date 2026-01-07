@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -12,8 +14,6 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* PRIMARY = ZINC GELAP di LIGHT MODE */
-    /* kira-kira zinc-900 */
     --primary: 240 5.9% 10%;
     --primary-foreground: 210 40% 98%;
 
@@ -42,21 +42,24 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
+
+    --sidebar-width: 22rem;
+    --sidebar-width-icon: 5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 240 10% 3.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 240 10% 3.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 210 40% 98%;
 
-    /* PRIMARY = KEBALIKANNYA di DARK MODE:
-       zinc sangat terang, teks gelap */
-    /* kira-kira zinc-100 */
     --primary: 240 4.8% 95.9%;
     --primary-foreground: 240 5.9% 10%;
 
@@ -76,13 +79,19 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
 
-    --grid: 220 8% 22%;
+    --grid: 240 3.7% 15.9%;
 
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --success: 142.1 70.6% 45.3%;
+    --success-foreground: 144.9 80.4% 10%;
+
+    --sidebar-width: 18rem;
+    --sidebar-width-icon: 4.5rem;
   }
 }
 
@@ -117,11 +126,11 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
 }
 
-/* =====================
-   BASE STYLES SHADCN
-   ===================== */
 @layer base {
   * {
     @apply border-border;
@@ -132,11 +141,6 @@
   }
 }
 
-/* ==============================
-   CONTAINER (SETARA CONFIG-MU)
-   center: true, padding: 2rem,
-   screens.2xl = 1400px
-   ============================== */
 @layer components {
   .container {
     width: 100%;
@@ -172,14 +176,11 @@
 
   @screen 2xl {
     .container {
-      max-width: 1400px; /* sesuai config-mu */
+      max-width: 1400px;
     }
   }
 }
 
-/* =========================================
-   ANIMASI ACCORDION (setara tailwindcss-animate)
-   ========================================= */
 @keyframes accordion-down {
   from {
     height: 0;
@@ -208,16 +209,12 @@
   }
 }
 
-/* ===========================
-   MAGIC UI VIEW-TRANSITION
-   =========================== */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 @layer utilities {
-  /* GRID BACKGROUND GLOBAL */
   .app-grid-background {
     position: fixed;
     inset: 0;
@@ -258,5 +255,47 @@
       ),
       linear-gradient(to bottom, hsl(var(--border)) 0.4px, transparent 0.4px);
     background-size: 24px 24px;
+  }
+}
+
+:root {
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

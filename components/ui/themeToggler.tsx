@@ -19,7 +19,6 @@ export const AnimatedThemeToggler = ({
   const [isDark, setIsDark] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Cek tema saat awal load
   useEffect(() => {
     const updateTheme = () => {
       setIsDark(document.documentElement.classList.contains("dark"));
@@ -37,8 +36,6 @@ export const AnimatedThemeToggler = ({
   }, []);
 
   const toggleTheme = useCallback(async () => {
-    // Fallback jika browser tidak support View Transition API
-    // @ts-ignore
     if (!document.startViewTransition || !buttonRef.current) {
       const newTheme = !isDark;
       setIsDark(newTheme);
@@ -47,7 +44,6 @@ export const AnimatedThemeToggler = ({
       return;
     }
 
-    // @ts-ignore
     await document.startViewTransition(() => {
       flushSync(() => {
         const newTheme = !isDark;

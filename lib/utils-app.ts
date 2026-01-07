@@ -1,14 +1,11 @@
-// lib/utils-app.ts
 import { AgendaType, DayOfWeek } from "@prisma/client";
 import { Book, Calendar, Trophy, Zap } from "lucide-react";
 
-// Mapping Hari
 export const DAY_TRANSLATION: Record<DayOfWeek, string> = {
   MONDAY: "Senin", TUESDAY: "Selasa", WEDNESDAY: "Rabu",
   THURSDAY: "Kamis", FRIDAY: "Jumat", SATURDAY: "Sabtu", SUNDAY: "Minggu",
 };
 
-// Mapping Icon & Warna untuk Agenda
 export const AGENDA_CONFIG = (type: AgendaType) => {
   switch (type) {
     case "ASSIGNMENT": return { label: "Tugas", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/50", icon: Book };
