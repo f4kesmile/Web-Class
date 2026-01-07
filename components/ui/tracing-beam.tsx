@@ -36,22 +36,31 @@ export const TracingBeam = ({
     {
       stiffness: 500,
       damping: 90,
-    },
+    }
   );
   const y2 = useSpring(
     useTransform(scrollYProgress, [0, 1], [50, svgHeight - 200]),
     {
       stiffness: 500,
       damping: 90,
-    },
+    }
   );
 
   return (
     <motion.div
       ref={ref}
-      className={cn("relative mx-auto h-full w-full max-w-4xl", className)}
+      // UBAH 1: Saya ganti max-w-4xl menjadi max-w-3xl agar container tidak terlalu lebar di desktop,
+      // sehingga garis beam otomatis lebih dekat ke kartu.
+      className={cn("relative mx-auto h-full w-full max-w-3xl", className)}
     >
-      <div className="absolute top-3 -left-4 md:-left-20">
+      {/* UBAH 2: PENGATURAN POSISI GARIS (BEAM)
+         - left-0: Posisi default di pinggir container (untuk mobile/tablet).
+         - md:-left-4: Pada tablet, geser sedikit ke kiri (sekitar 16px).
+         - lg:-left-12: Pada desktop, geser lebih jauh (sekitar 48px).
+         
+         *TIPS: Ubah angka 'left' di bawah ini jika ingin lebih dekat/jauh.
+      */}
+      <div className="absolute top-3 left-0 md:-left-4 lg:-left-12">
         <motion.div
           transition={{
             duration: 0.2,
@@ -63,7 +72,7 @@ export const TracingBeam = ({
                 ? "none"
                 : "rgba(0, 0, 0, 0.24) 0px 3px 8px",
           }}
-          className="border-netural-200 ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border shadow-sm"
+          className="border-neutral-200 ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border shadow-sm"
         >
           <motion.div
             transition={{
@@ -80,7 +89,7 @@ export const TracingBeam = ({
         <svg
           viewBox={`0 0 20 ${svgHeight}`}
           width="20"
-          height={svgHeight} // Set the SVG height
+          height={svgHeight}
           className="ml-4 block"
           aria-hidden="true"
         >
@@ -109,8 +118,8 @@ export const TracingBeam = ({
               gradientUnits="userSpaceOnUse"
               x1="0"
               x2="0"
-              y1={y1} // set y1 for gradient
-              y2={y2} // set y2 for gradient
+              y1={y1}
+              y2={y2}
             >
               <stop stopColor="#18CCFC" stopOpacity="0"></stop>
               <stop stopColor="#18CCFC"></stop>
