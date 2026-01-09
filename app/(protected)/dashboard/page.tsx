@@ -126,7 +126,7 @@ export default async function DashboardPage() {
             <GraduationCap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4</div>
+            <div className="text-2xl font-bold">IV</div>
           </CardContent>
         </Card>
       </div>

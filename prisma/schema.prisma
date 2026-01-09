@@ -127,7 +127,7 @@ model Gallery {
   imageUrl  String
   caption   String?
   eventDate DateTime @default(now())
-
+  
   createdAt DateTime @default(now())
 }
 

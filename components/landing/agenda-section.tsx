@@ -15,7 +15,7 @@ const agendas = [
     date: "12 Jan 2026",
     type: "Ujian",
     description:
-      "Ujian tulis mata kuliah Algoritma & Struktur Data di Ruang 404.",
+      "Ujian tulis mata kuliah Algoritma & Struktur Data di Ruang J204.",
     icon: AlertCircle,
     highlightColor: "text-red-400",
   },

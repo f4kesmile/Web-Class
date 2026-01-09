@@ -16,7 +16,7 @@ export function OfficerSection() {
           {/* LEVEL 1: KETUA */}
           <div className="relative z-10">
             <OfficerCard
-              name="Muhammad Rizky"
+              name="Khaekal Lazib Luth R"
               role="Ketua Kelas"
               image="https://github.com/shadcn.png"
               isLeader
@@ -28,7 +28,7 @@ export function OfficerSection() {
           {/* CONNECTOR HORIZONTAL (CABANG) */}
           <div className="relative mt-16 w-full max-w-4xl">
             {/* Garis Horizontal */}
-            <div className="absolute top-0 left-16 right-16 h-px bg-neutral-700 hidden md:block" />
+            <div className="absolute top-0 left-[16.6%] right-[16.6%] h-px bg-neutral-700 hidden md:block" />
 
             {/* Garis Vertikal Naik ke Ketua */}
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-px h-8 bg-neutral-700 hidden md:block" />
@@ -39,7 +39,7 @@ export function OfficerSection() {
               <div className="flex flex-col items-center relative">
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-px h-8 bg-neutral-700 hidden md:block" />
                 <OfficerCard
-                  name="Siti Nurhaliza"
+                  name="Nisa Alya Faradisa"
                   role="Sekretaris"
                   image="https://i.pravatar.cc/150?u=siti"
                 />
@@ -49,7 +49,7 @@ export function OfficerSection() {
               <div className="flex flex-col items-center relative">
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-px h-8 bg-neutral-700 hidden md:block" />
                 <OfficerCard
-                  name="Andi Pratama"
+                  name="Hendri Hariansyah"
                   role="Wakil Ketua"
                   image="https://i.pravatar.cc/150?u=andi"
                 />
@@ -59,7 +59,7 @@ export function OfficerSection() {
               <div className="flex flex-col items-center relative">
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-px h-8 bg-neutral-700 hidden md:block" />
                 <OfficerCard
-                  name="Budi Santoso"
+                  name="Nur Aeni Anisah"
                   role="Bendahara"
                   image="https://i.pravatar.cc/150?u=budi"
                 />

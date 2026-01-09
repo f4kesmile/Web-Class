@@ -32,19 +32,19 @@ const DummyContent = ({ text }: { text: string }) => {
 
 const data = [
   {
-    category: "Akademik",
-    title: "Presentasi Project Akhir.",
-    src: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=3540&auto=format&fit=crop",
+    category: "Kebersamaan",
+    title: "Semester 1",
+    src: "/images/smstr1.jpeg",
     content: (
-      <DummyContent text="Momen presentasi project besar semester 3 di depan dosen penguji." />
+      <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-xl font-sans">Foto ini menjadi saksi langkah awal kami sebagai satu angkatan di semester pertama. Sebuah awal dari perjalanan panjang menuntut ilmu, membangun kebersamaan, dan merangkai masa depan. Semester 1 masih canggung, masih belajar, tapi penuh cerita. Terima kasih untuk setiap tawa, lelah, dan kebersamaan di awal perjalanan ini.</p>
     ),
   },
   {
     category: "Event",
-    title: "Kunjungan Industri 2025.",
-    src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=3540&auto=format&fit=crop",
+    title: "Makrab 2024",
+    src: "/images/Event makrab.jpeg",
     content: (
-      <DummyContent text="Kunjungan ke kantor Google Indonesia untuk belajar budaya kerja startup." />
+      <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-xl font-sans">Malam Keakraban menjadi wadah interaksi positif antar mahasiswa guna menumbuhkan rasa kekeluargaan dan kebersamaan dalam mendukung kegiatan akademik dan non-akademik.</p>
     ),
   },
   {
