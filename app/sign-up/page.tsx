@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner"; // 1. Import Toast
 import {
   Github,
   Loader2,
@@ -28,25 +29,42 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // 2. State untuk Toggle Password (Utama & Konfirmasi)
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    if (password !== confirmPassword) return alert("Password tidak cocok!");
+    // Validasi Match
+    if (password !== confirmPassword) {
+      return toast.error("Password dan Konfirmasi Password tidak sama!");
+    }
+
     setLoading(true);
 
     await signUp.email(
       { email, password, name },
       {
-        onSuccess: () => router.push("/dashboard"),
-        onError: (ctx) => alert(ctx.error.message),
+        onSuccess: () => {
+          toast.success("Akun berhasil dibuat! Selamat datang.");
+          router.push("/"); // Redirect ke Home (Freemium logic)
+        },
+        onError: (ctx) => {
+          // Ganti alert dengan toast
+          toast.error(ctx.error.message || "Gagal membuat akun.");
+          setLoading(false);
+        },
       }
     );
-    setLoading(false);
   };
 
   const handleSocialLogin = async (provider: "google" | "github") => {
-    await signIn.social({ provider, callbackURL: "/dashboard" });
+    await signIn.social({
+      provider,
+      callbackURL: "/", // Redirect ke Home
+    });
   };
 
   return (
@@ -91,6 +109,7 @@ export default function SignUpPage() {
       </div>
 
       <div className="space-y-4">
+        {/* NAMA */}
         <div className="space-y-2">
           <Label>Nama Lengkap</Label>
           <div className="relative group">
@@ -104,6 +123,7 @@ export default function SignUpPage() {
           </div>
         </div>
 
+        {/* EMAIL */}
         <div className="space-y-2">
           <Label>Email</Label>
           <div className="relative group">
@@ -118,6 +138,7 @@ export default function SignUpPage() {
           </div>
         </div>
 
+        {/* PASSWORD */}
         <div className="space-y-2">
           <Label>Password</Label>
           <div className="relative group">
@@ -143,17 +164,30 @@ export default function SignUpPage() {
           </div>
         </div>
 
+        {/* KONFIRMASI PASSWORD (DENGAN TOMBOL MATA) */}
         <div className="space-y-2">
           <Label>Konfirmasi Password</Label>
           <div className="relative group">
             <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground group-focus-within:text-foreground transition-colors" />
             <Input
-              type={showPassword ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"} // Gunakan state confirm
               placeholder="Ulangi password"
-              className="pl-10 h-11"
+              className="pl-10 pr-10 h-11" // Tambah padding kanan
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
+            {/* Tombol Mata untuk Konfirmasi */}
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
           </div>
         </div>
       </div>

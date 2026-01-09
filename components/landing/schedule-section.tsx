@@ -1,11 +1,26 @@
 "use client";
 import React from "react";
 import { TracingBeam } from "@/components/ui/tracing-beam";
-import { Clock, MapPin, User, CalendarDays } from "lucide-react";
+import { Clock, MapPin, User, CalendarDays, Coffee } from "lucide-react";
 
-export function ScheduleSection() {
+interface ScheduleSectionProps {
+  data: any[];
+}
+
+export function ScheduleSection({ data }: ScheduleSectionProps) {
+  if (!data || data.length === 0) {
+    return (
+      <section className="bg-neutral-950 py-24 relative overflow-x-clip text-center">
+        <h2 className="text-3xl font-bold text-white mb-4">Jadwal Kuliah</h2>
+        <div className="mt-8 flex flex-col items-center justify-center text-neutral-500">
+          <Coffee className="w-16 h-16 mb-4 opacity-40" />
+          <p>Jadwal kuliah belum diatur oleh Admin.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    // UBAH: Gunakan 'overflow-x-clip' agar animasi vertikal aman, tapi horizontal tidak terpotong paksa
     <section className="bg-neutral-950 py-24 relative overflow-x-clip">
       <div className="max-w-2xl mx-auto mb-16 text-center px-4">
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
@@ -14,39 +29,41 @@ export function ScheduleSection() {
         <p className="text-neutral-400">Ikuti alur pembelajaran minggu ini.</p>
       </div>
 
-      {/* px-4 md:px-8: Memberikan ruang napas di kiri kanan agar garis Beam tidak menempel tepi layar tablet
-       */}
       <TracingBeam className="px-4 md:px-8">
         <div className="max-w-2xl mx-auto antialiased pt-4 relative">
-          {scheduleData.map((item, index) => (
-            // pl-8 md:pl-12: Memberi jarak antara GARIS BEAM dengan KARTU KONTEN
+          {data.map((item, index) => (
             <div
-              key={`content-${index}`}
+              key={item.id || index}
               className="mb-12 relative pl-8 md:pl-12"
             >
               <h2 className="bg-black text-white rounded-full text-xs font-mono w-fit px-4 py-1 mb-4 border border-neutral-800 flex items-center gap-2">
                 <CalendarDays className="w-3 h-3 text-blue-500" />
-                {item.day}
+                {formatDay(item.day)}
               </h2>
 
               <div className="p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 hover:border-blue-500/30 transition-all hover:bg-neutral-900 shadow-sm">
                 <p className="text-xl font-bold text-white mb-4 font-sans flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                  {item.course}
+                  {item.subject}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-neutral-400">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-neutral-500" />
-                    {item.time}
+                    {item.startTime} - {item.endTime} WIB
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-neutral-500" />
-                    {item.room}
+                    {item.room || "Ruang belum set"}
                   </div>
                   <div className="flex items-center gap-2 md:col-span-2">
                     <User className="w-4 h-4 text-neutral-500" />
-                    {item.lecturer}
+                    {item.lecturer || "Dosen belum set"}
                   </div>
+                  {item.credits && (
+                    <div className="col-span-2 mt-2 text-xs bg-neutral-800 w-fit px-2 py-1 rounded text-neutral-500">
+                      {item.credits} SKS
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -57,33 +74,15 @@ export function ScheduleSection() {
   );
 }
 
-const scheduleData = [
-  {
-    day: "Senin",
-    course: "Pemrograman Web Lanjut",
-    time: "08:00 - 10:30",
-    room: "Lab Komputer 3",
-    lecturer: "Dr. Budi Santoso",
-  },
-  {
-    day: "Selasa",
-    course: "Basis Data Terdistribusi",
-    time: "10:00 - 12:00",
-    room: "Ruang Teori A",
-    lecturer: "Siti Aminah, M.Kom",
-  },
-  {
-    day: "Rabu",
-    course: "Kecerdasan Buatan",
-    time: "13:00 - 15:30",
-    room: "Smart Class",
-    lecturer: "Prof. John Doe",
-  },
-  {
-    day: "Kamis",
-    course: "Etika Profesi",
-    time: "09:00 - 11:00",
-    room: "Aula Utama",
-    lecturer: "Ahmad Yani, S.H.",
-  },
-];
+function formatDay(day: string) {
+  const map: Record<string, string> = {
+    MONDAY: "Senin",
+    TUESDAY: "Selasa",
+    WEDNESDAY: "Rabu",
+    THURSDAY: "Kamis",
+    FRIDAY: "Jumat",
+    SATURDAY: "Sabtu",
+    SUNDAY: "Minggu",
+  };
+  return map[day] || day;
+}

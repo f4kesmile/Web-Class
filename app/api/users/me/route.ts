@@ -1,0 +1,21 @@
+import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth"; // Menggunakan helper auth yang sudah ada
+
+export async function GET() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  return NextResponse.json({
+    success: true,
+    data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        image: user.image,
+    },
+  });
+}

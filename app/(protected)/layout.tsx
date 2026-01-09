@@ -10,6 +10,7 @@ import {
 import { GridBackground } from "@/components/ui/grid-background";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { Toaster } from "sonner";
 
 export default async function ProtectedLayout({
   children,
@@ -29,7 +30,7 @@ export default async function ProtectedLayout({
           <div className="absolute inset-0 z-0">
             <GridBackground className="h-full w-full items-start justify-start" />
           </div>
-          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-md">
+          <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-md">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />

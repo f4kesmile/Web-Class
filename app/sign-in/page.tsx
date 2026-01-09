@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
+import { signIn, authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 import {
   Github,
   Loader2,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { GoogleIcon } from "@/components/icons/google-icon";
 import { AuthLayout } from "@/components/auth/auth-layout";
+import { User, Role } from "@prisma/client";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -35,15 +37,35 @@ export default function SignInPage() {
     await signIn.email(
       { email, password, rememberMe },
       {
-        onSuccess: () => router.push("/dashboard"),
-        onError: (ctx) => alert(ctx.error.message),
+        onSuccess: async () => {
+          const session = await authClient.getSession();
+          if (session.data?.user) {
+            const user = session.data.user as unknown as User;
+
+            toast.success(`Selamat datang kembali, ${user.name}!`);
+
+            if (user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) {
+              router.push("/dashboard");
+            } else {
+              router.push("/");
+            }
+          } else {
+            router.push("/");
+          }
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message || "Gagal masuk. Cek email/password.");
+        },
       }
     );
     setLoading(false);
   };
 
   const handleSocialLogin = async (provider: "google" | "github") => {
-    await signIn.social({ provider, callbackURL: "/dashboard" });
+    await signIn.social({
+      provider,
+      callbackURL: "/",
+    });
   };
 
   return (
@@ -147,7 +169,6 @@ export default function SignInPage() {
         </div>
       </div>
 
-      {/* default Button = variant primary → pakai warna dari tema */}
       <Button className="w-full h-11" onClick={handleSignIn} disabled={loading}>
         {loading ? (
           <Loader2 className="w-4 h-4 animate-spin" />

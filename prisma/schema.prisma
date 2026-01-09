@@ -30,22 +30,50 @@ enum DayOfWeek {
 }
 
 model User {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   name          String
-  email         String   @unique
+  email         String  @unique
   emailVerified Boolean
   image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  role          Role    @default(USER)
+  isBanned      Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   sessions Session[]
   accounts Account[]
-
-  role     String   @default("user")
-  isBanned Boolean  @default(false)
   officer  Officer?
 
+  activityLogs  ActivityLog[]
+  announcements Announcement[]
+
   @@map("user")
+}
+
+model ActivityLog {
+  id        String  @id @default(cuid())
+  action    String
+  details   String? @db.Text
+  ipAddress String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Announcement {
+  id       String  @id @default(cuid())
+  title    String
+  content  String  @db.Text
+  isActive Boolean @default(true)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Session {
@@ -106,7 +134,6 @@ model Agenda {
   createdAt DateTime @default(now())
 }
 
-// Jadwal Kuliah
 model Schedule {
   id        String    @id @default(cuid())
   day       DayOfWeek
@@ -121,17 +148,16 @@ model Schedule {
   updatedAt DateTime @updatedAt
 }
 
-// Galeri Kelas
 model Gallery {
-  id        String   @id @default(cuid())
-  imageUrl  String
-  caption   String?
-  eventDate DateTime @default(now())
+  id          String   @id @default(cuid())
+  title       String   @default("Kegiatan Kelas")
+  description String?  @db.Text
+  imageUrl    String   @db.LongText
+  eventDate   DateTime @default(now())
 
   createdAt DateTime @default(now())
 }
 
-// Struktur Pengurus Kelas
 model Officer {
   id           String @id @default(cuid())
   position     String
@@ -142,10 +168,20 @@ model Officer {
 }
 
 model SiteSettings {
-  id           String  @id @default(cuid())
-  className    String  @default("Informatika 4C")
-  semester     String  @default("4")
-  announcement String? @db.Text
+  id String @id @default(cuid())
+
+  siteName    String  @default("Web Kelas")
+  description String? @db.Text
+
+  className    String @default("Informatika 4C")
+  semester     String @default("4")
+  academicYear String @default("2024/2025")
+
+  supportEmail String?
+  instagram    String?
+  whatsapp     String?
+
+  emailSender String?
 
   updatedAt DateTime @updatedAt
 }

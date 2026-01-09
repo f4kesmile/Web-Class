@@ -142,7 +142,7 @@
 }
 
 @layer components {
-  .container {
+  .kp-container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -151,31 +151,27 @@
   }
 
   @screen sm {
-    .container {
+    .kp-container {
       max-width: 640px;
     }
   }
-
   @screen md {
-    .container {
+    .kp-container {
       max-width: 768px;
     }
   }
-
   @screen lg {
-    .container {
+    .kp-container {
       max-width: 1024px;
     }
   }
-
   @screen xl {
-    .container {
+    .kp-container {
       max-width: 1280px;
     }
   }
-
   @screen 2xl {
-    .container {
+    .kp-container {
       max-width: 1400px;
     }
   }

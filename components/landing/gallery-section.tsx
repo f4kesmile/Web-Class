@@ -1,11 +1,87 @@
 "use client";
 import React from "react";
 import { Carousel, Card } from "@/components/ui/apple-cards-carousel";
+import { ImageOff, CalendarDays, AlignLeft } from "lucide-react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import Image from "next/image";
 
-export function GallerySection() {
-  const cards = data.map((card, index) => (
-    <Card key={card.src} card={card} index={index} />
-  ));
+interface GallerySectionProps {
+  data: any[];
+}
+
+export function GallerySection({ data }: GallerySectionProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full py-24 bg-neutral-950 border-t border-neutral-900 text-center">
+        <h2 className="text-xl md:text-5xl font-bold text-neutral-200 mb-8">
+          Galeri Kegiatan
+        </h2>
+        <div className="flex flex-col items-center text-neutral-600">
+          <ImageOff className="w-12 h-12 mb-4" />
+          <p>Belum ada foto kegiatan.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const cards = data.map((item, index) => {
+    const validUrl = item.imageUrl || "";
+
+    const dateCategory = item.eventDate
+      ? format(new Date(item.eventDate), "dd MMMM yyyy", { locale: id })
+      : "Dokumentasi";
+
+    return (
+      <Card
+        key={item.id || index}
+        card={{
+          category: dateCategory,
+
+          title: item.title || "Kegiatan Tanpa Judul",
+
+          src: validUrl,
+
+          content: (
+            <div className="bg-[#F5F5F7] dark:bg-neutral-800 p-8 md:p-14 rounded-3xl mb-4">
+              <div className="max-w-3xl mx-auto space-y-6">
+                <h3 className="text-2xl md:text-4xl font-bold text-neutral-800 dark:text-neutral-100">
+                  {item.title}
+                </h3>
+
+                <div className="flex items-center gap-2 text-neutral-500">
+                  <CalendarDays className="w-5 h-5" />
+                  <span className="text-sm font-medium">{dateCategory}</span>
+                </div>
+
+                <div className="text-neutral-600 dark:text-neutral-400 text-base md:text-lg leading-relaxed font-sans">
+                  {item.description ? (
+                    item.description
+                  ) : (
+                    <span className="italic opacity-50">
+                      Tidak ada deskripsi detail untuk kegiatan ini.
+                    </span>
+                  )}
+                </div>
+
+                {validUrl && (
+                  <div className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden mt-6 shadow-md">
+                    <Image
+                      src={validUrl}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          ),
+        }}
+        index={index}
+      />
+    );
+  });
 
   return (
     <div className="w-full h-full py-24 bg-neutral-950 border-t border-neutral-900">
@@ -16,51 +92,3 @@ export function GallerySection() {
     </div>
   );
 }
-
-const DummyContent = ({ text }: { text: string }) => {
-  return (
-    <div className="bg-[#F5F5F7] dark:bg-neutral-800 p-8 md:p-14 rounded-3xl mb-4">
-      <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-2xl font-sans max-w-3xl mx-auto">
-        <span className="font-bold text-neutral-700 dark:text-neutral-200">
-          Dokumentasi
-        </span>{" "}
-        {text}
-      </p>
-    </div>
-  );
-};
-
-const data = [
-  {
-    category: "Akademik",
-    title: "Presentasi Project Akhir.",
-    src: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=3540&auto=format&fit=crop",
-    content: (
-      <DummyContent text="Momen presentasi project besar semester 3 di depan dosen penguji." />
-    ),
-  },
-  {
-    category: "Event",
-    title: "Kunjungan Industri 2025.",
-    src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=3540&auto=format&fit=crop",
-    content: (
-      <DummyContent text="Kunjungan ke kantor Google Indonesia untuk belajar budaya kerja startup." />
-    ),
-  },
-  {
-    category: "Olahraga",
-    title: "Class Meeting Futsal.",
-    src: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=3693&auto=format&fit=crop",
-    content: (
-      <DummyContent text="Pertandingan persahabatan antar kelas yang sangat sengit." />
-    ),
-  },
-  {
-    category: "Sosial",
-    title: "Buka Puasa Bersama.",
-    src: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=3540&auto=format&fit=crop",
-    content: (
-      <DummyContent text="Mempererat tali silaturahmi di bulan Ramadhan." />
-    ),
-  },
-];

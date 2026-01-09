@@ -71,7 +71,7 @@ function GreetingHeader({ name, role }: { name: string; role: string }) {
         <p className="text-muted-foreground">Selamat datang kembali, {name}.</p>
       </div>
       <Badge variant="outline" className="w-fit px-3 py-1 text-sm capitalize">
-        Role: {(role || "user").toLowerCase().replace("_", " ")}
+        Role: {(role || "USER").toLowerCase().replace("_", " ")}
       </Badge>
     </div>
   );

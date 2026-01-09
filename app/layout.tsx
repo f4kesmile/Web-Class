@@ -14,9 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body className="min-h-screen bg-background text-foreground">
+      <body className="min-h-[100dvh] w-screen overflow-x-hidden bg-background text-foreground">
         <GridBackground>
-          <div className="min-h-screen flex flex-col">{children}</div>
+          <div className="min-h-[100dvh] w-full flex flex-col">{children}</div>
         </GridBackground>
       </body>
     </html>
