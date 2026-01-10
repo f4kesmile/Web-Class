@@ -4,9 +4,7 @@ import { prisma } from "@/lib/prisma";
 import nodemailer from "nodemailer";
 
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "mysql", 
-  }),
+  database: prismaAdapter(prisma, { provider: "mysql" }),
   user: {
     additionalFields: {
       role: {

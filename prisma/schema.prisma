@@ -34,7 +34,7 @@ model User {
   name          String
   email         String  @unique
   emailVerified Boolean
-  image         String?
+  image         String? @db.LongText
   role          Role    @default(USER)
   isBanned      Boolean @default(false)
 

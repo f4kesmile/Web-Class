@@ -150,27 +150,31 @@
     padding-right: 2rem;
   }
 
-  @screen sm {
+  @media (min-width: 640px) {
     .kp-container {
       max-width: 640px;
     }
   }
-  @screen md {
+
+  @media (min-width: 768px) {
     .kp-container {
       max-width: 768px;
     }
   }
-  @screen lg {
+
+  @media (min-width: 1024px) {
     .kp-container {
       max-width: 1024px;
     }
   }
-  @screen xl {
+
+  @media (min-width: 1280px) {
     .kp-container {
       max-width: 1280px;
     }
   }
-  @screen 2xl {
+
+  @media (min-width: 1536px) {
     .kp-container {
       max-width: 1400px;
     }

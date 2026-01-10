@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,79 +12,84 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOut } from "@/lib/auth-client"; // Client Auth Better Auth
-import { LogOut, User as UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
+import { signOut } from "@/lib/auth-client";
+import { ProfileDialog } from "@/components/auth/profile-dialog";
+import { AuthUser } from "@/lib/auth";
 
 interface UserButtonProps {
-  user: {
-    name: string;
-    email: string;
-    image?: string | null;
-  };
+  user: AuthUser;
 }
 
 export function UserButton({ user }: UserButtonProps) {
+  const [isProfileOpen, setProfileOpen] = useState(false);
   const router = useRouter();
 
   const handleLogout = async () => {
-    await signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/sign-in"); // Redirect ke login setelah logout
-        },
-      },
-    });
+    try {
+      await signOut();
+      router.push("/sign-in");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout error", error);
+    }
   };
 
-  // Ambil inisial nama (Misal: "Dimas" -> "D")
-  const initials = user.name?.charAt(0).toUpperCase() || "U";
+  if (!user) return null;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10 border border-slate-700">
-            {/* Tampilkan gambar jika ada, jika null pakai fallback */}
-            <AvatarImage src={user.image || ""} alt={user.name} />
-            <AvatarFallback className="bg-blue-600 text-white font-bold">
-              {initials}
+    <>
+      <ProfileDialog
+        user={user}
+        open={isProfileOpen}
+        onOpenChange={setProfileOpen}
+      />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger className="focus:outline-none">
+          <Avatar className="h-9 w-9 border border-white/10 transition hover:scale-105 cursor-pointer ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <AvatarImage
+              src={user.image || ""}
+              alt={user.name || "User"}
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-blue-600 text-white font-medium">
+              {user.name?.[0]?.toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56 bg-slate-900 border-slate-800 text-slate-200"
-        align="end"
-        forceMount
-      >
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none text-white">
-              {user.name}
-            </p>
-            <p className="text-xs leading-none text-slate-400">{user.email}</p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-slate-800" />
+        </DropdownMenuTrigger>
 
-        {/* Menu Item Profil (Opsional) */}
-        <DropdownMenuItem className="cursor-pointer focus:bg-slate-800 focus:text-white">
-          <UserIcon className="mr-2 h-4 w-4" />
-          Profil Saya
-        </DropdownMenuItem>
+        <DropdownMenuContent className="w-56 mt-2 mr-4" align="end">
+          <DropdownMenuLabel>
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none truncate">
+                {user.name}
+              </p>
+              <p className="text-xs leading-none text-muted-foreground truncate">
+                {user.email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
 
-        <DropdownMenuSeparator className="bg-slate-800" />
+          <DropdownMenuItem
+            onClick={() => setProfileOpen(true)}
+            className="cursor-pointer"
+          >
+            <UserIcon className="mr-2 h-4 w-4" />
+            <span>Profil Saya</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
 
-        {/* Tombol Logout */}
-        <DropdownMenuItem
-          onClick={handleLogout}
-          className="text-red-400 cursor-pointer focus:bg-red-900/20 focus:text-red-400"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem
+            className="text-red-500 cursor-pointer focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/50"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Keluar</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

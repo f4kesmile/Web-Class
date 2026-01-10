@@ -18,7 +18,7 @@ export function HeroSection() {
 
   return (
     <div
-      className="h-[300vh] bg-black w-full relative pt-40 overflow-clip"
+      className="h-[300vh] bg-white dark:bg-black w-full relative pt-40 overflow-clip"
       ref={ref}
     >
       <GoogleGeminiEffect

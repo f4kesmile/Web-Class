@@ -6,6 +6,7 @@ import { GraduationCap, LayoutDashboard, LogIn, UserPlus } from "lucide-react";
 import { UserButton } from "@/components/auth/user-button";
 import type { AuthUser } from "@/lib/auth";
 import { Role } from "@prisma/client";
+import { AnimatedThemeToggler } from "@/components/ui/themeToggler"; // Import Toggler
 
 interface NavbarProps {
   user?: AuthUser | null;
@@ -28,7 +29,9 @@ export function Navbar({ user }: NavbarProps) {
         </span>
       </Link>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
+        <AnimatedThemeToggler />
+
         {user ? (
           <>
             {isAdmin && (
