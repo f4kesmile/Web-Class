@@ -1,17 +1,19 @@
 "use client";
+
 import React from "react";
 import { Carousel, Card } from "@/components/ui/apple-cards-carousel";
-import { ImageOff, CalendarDays, AlignLeft } from "lucide-react";
+import { ImageOff, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
+import type { Gallery } from "@prisma/client";
 
-interface GallerySectionProps {
-  data: any[];
+export interface GallerySectionProps {
+  galleries: Gallery[];
 }
 
-export function GallerySection({ data }: GallerySectionProps) {
-  if (!data || data.length === 0) {
+export function GallerySection({ galleries }: GallerySectionProps) {
+  if (!galleries || galleries.length === 0) {
     return (
       <div className="w-full py-24 bg-neutral-950 border-t border-neutral-900 text-center">
         <h2 className="text-xl md:text-5xl font-bold text-neutral-200 mb-8">
@@ -25,9 +27,8 @@ export function GallerySection({ data }: GallerySectionProps) {
     );
   }
 
-  const cards = data.map((item, index) => {
+  const cards = galleries.map((item, index) => {
     const validUrl = item.imageUrl || "";
-
     const dateCategory = item.eventDate
       ? format(new Date(item.eventDate), "dd MMMM yyyy", { locale: id })
       : "Dokumentasi";
@@ -37,11 +38,8 @@ export function GallerySection({ data }: GallerySectionProps) {
         key={item.id || index}
         card={{
           category: dateCategory,
-
           title: item.title || "Kegiatan Tanpa Judul",
-
           src: validUrl,
-
           content: (
             <div className="bg-[#F5F5F7] dark:bg-neutral-800 p-8 md:p-14 rounded-3xl mb-4">
               <div className="max-w-3xl mx-auto space-y-6">
@@ -68,7 +66,7 @@ export function GallerySection({ data }: GallerySectionProps) {
                   <div className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden mt-6 shadow-md">
                     <Image
                       src={validUrl}
-                      alt={item.title}
+                      alt={item.title || "Galeri"}
                       fill
                       className="object-cover"
                     />

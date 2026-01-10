@@ -1,14 +1,16 @@
 "use client";
+
 import React from "react";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Clock, MapPin, User, CalendarDays, Coffee } from "lucide-react";
+import type { DayOfWeek, Schedule } from "@prisma/client";
 
-interface ScheduleSectionProps {
-  data: any[];
+export interface ScheduleSectionProps {
+  schedules: Schedule[];
 }
 
-export function ScheduleSection({ data }: ScheduleSectionProps) {
-  if (!data || data.length === 0) {
+export function ScheduleSection({ schedules }: ScheduleSectionProps) {
+  if (!schedules || schedules.length === 0) {
     return (
       <section className="bg-neutral-950 py-24 relative overflow-x-clip text-center">
         <h2 className="text-3xl font-bold text-white mb-4">Jadwal Kuliah</h2>
@@ -31,7 +33,7 @@ export function ScheduleSection({ data }: ScheduleSectionProps) {
 
       <TracingBeam className="px-4 md:px-8">
         <div className="max-w-2xl mx-auto antialiased pt-4 relative">
-          {data.map((item, index) => (
+          {schedules.map((item, index) => (
             <div
               key={item.id || index}
               className="mb-12 relative pl-8 md:pl-12"
@@ -46,20 +48,24 @@ export function ScheduleSection({ data }: ScheduleSectionProps) {
                   <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                   {item.subject}
                 </p>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-neutral-400">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-neutral-500" />
                     {item.startTime} - {item.endTime} WIB
                   </div>
+
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-neutral-500" />
                     {item.room || "Ruang belum set"}
                   </div>
+
                   <div className="flex items-center gap-2 md:col-span-2">
                     <User className="w-4 h-4 text-neutral-500" />
                     {item.lecturer || "Dosen belum set"}
                   </div>
-                  {item.credits && (
+
+                  {typeof item.credits === "number" && item.credits > 0 && (
                     <div className="col-span-2 mt-2 text-xs bg-neutral-800 w-fit px-2 py-1 rounded text-neutral-500">
                       {item.credits} SKS
                     </div>
@@ -74,7 +80,7 @@ export function ScheduleSection({ data }: ScheduleSectionProps) {
   );
 }
 
-function formatDay(day: string) {
+function formatDay(day: DayOfWeek | string) {
   const map: Record<string, string> = {
     MONDAY: "Senin",
     TUESDAY: "Selasa",
@@ -84,5 +90,5 @@ function formatDay(day: string) {
     SATURDAY: "Sabtu",
     SUNDAY: "Minggu",
   };
-  return map[day] || day;
+  return map[String(day)] || String(day);
 }

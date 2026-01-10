@@ -1,39 +1,72 @@
 import { auth } from "@/lib/auth-config";
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { User, Role } from "@prisma/client";
-export async function getCurrentUser() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+import { prisma } from "@/lib/prisma";
+import { Role, type User as PrismaUser } from "@prisma/client";
 
-  if (!session?.user) return null;
+export type AuthUser = Pick<
+  PrismaUser,
+  "id" | "name" | "email" | "image" | "role" | "isBanned"
+>;
 
-  return session.user as unknown as User;
+async function buildAuthHeadersFromCookies(): Promise<HeadersInit> {
+  const cookieStore = await cookies();
+
+  const cookieHeader = cookieStore
+    .getAll()
+    .map(
+      (c: { name: string; value: string }) =>
+        `${c.name}=${encodeURIComponent(c.value)}`
+    )
+    .join("; ");
+
+  return { cookie: cookieHeader };
 }
 
-export async function requireAdmin() {
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  const session = await auth.api.getSession({
+    headers: await buildAuthHeadersFromCookies(),
+  });
+
+  const sessionUserId = session?.user?.id;
+  if (!sessionUserId) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: sessionUserId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      role: true,
+      isBanned: true,
+    },
+  });
+
+  return user ?? null;
+}
+
+export async function requireAdmin(): Promise<AuthUser> {
   const user = await getCurrentUser();
 
-  if (!user) return redirect("/sign-in");
-
-  if (user.isBanned) return redirect("/banned");
+  if (!user) redirect("/sign-in");
+  if (user.isBanned) redirect("/banned");
 
   if (user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN) {
-    return redirect("/dashboard");
+    redirect("/dashboard");
   }
 
   return user;
 }
 
-export async function requireSuperAdmin() {
+export async function requireSuperAdmin(): Promise<AuthUser> {
   const user = await getCurrentUser();
-  
-  if (!user) return redirect("/sign-in");
-  if (user.isBanned) return redirect("/banned");
+
+  if (!user) redirect("/sign-in");
+  if (user.isBanned) redirect("/banned");
 
   if (user.role !== Role.SUPER_ADMIN) {
-    return redirect("/dashboard"); 
+    redirect("/dashboard");
   }
 
   return user;

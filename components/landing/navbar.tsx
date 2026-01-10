@@ -3,21 +3,19 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, LayoutDashboard, LogIn, UserPlus } from "lucide-react";
-import { UserButton } from "@/components/auth/user-button"; // Pastikan path ini benar
+import { UserButton } from "@/components/auth/user-button";
+import type { AuthUser } from "@/lib/auth";
+import { Role } from "@prisma/client";
 
 interface NavbarProps {
-  user?: any; // Menerima data user dari page.tsx
+  user?: AuthUser | null;
 }
 
 export function Navbar({ user }: NavbarProps) {
-  // Logic: Cek apakah user memiliki akses admin
-  // Kita gunakan .toLowerCase() untuk jaga-jaga jika di DB tertulis "ADMIN" atau "admin"
-  const role = user?.role?.toLowerCase();
-  const isAdmin = role === "admin" || role === "super_admin";
+  const isAdmin = user?.role === Role.ADMIN || user?.role === Role.SUPER_ADMIN;
 
   return (
     <nav className="fixed top-4 inset-x-0 max-w-3xl mx-auto z-50 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 flex items-center justify-between shadow-2xl transition-all hover:bg-black/70">
-      {/* 1. LOGO */}
       <Link
         href="/"
         className="flex items-center gap-2 font-bold text-white hover:opacity-80 transition-opacity"
@@ -30,11 +28,9 @@ export function Navbar({ user }: NavbarProps) {
         </span>
       </Link>
 
-      {/* 2. MENU KANAN (Dinadmis) */}
       <div className="flex items-center gap-3">
         {user ? (
           <>
-            {/* JIKA ADMIN: Tampilkan Tombol Dashboard */}
             {isAdmin && (
               <Link href="/dashboard" className="hidden sm:block">
                 <Button
@@ -48,14 +44,12 @@ export function Navbar({ user }: NavbarProps) {
               </Link>
             )}
 
-            {/* JIKA LOGIN (Admin/User): Tampilkan Avatar & Logout Menu */}
             <div className="pl-2 border-l border-white/10">
               <UserButton user={user} />
             </div>
           </>
         ) : (
           <>
-            {/* JIKA BELUM LOGIN: Tombol Masuk & Daftar */}
             <Link href="/sign-in">
               <Button
                 size="sm"
