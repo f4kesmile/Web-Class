@@ -3,7 +3,6 @@ import { BookOpenCheck } from "lucide-react";
 import { getAgendas } from "@/actions/agenda";
 import { getCurrentUser } from "@/lib/auth";
 import { Role } from "@prisma/client";
-
 import { AgendaView } from "@/components/dashboard/agenda-view";
 import { CreateAgendaDialog } from "@/components/dashboard/create-agenda-dialog";
 
@@ -19,7 +18,6 @@ export default async function AssignmentsPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
@@ -31,11 +29,9 @@ export default async function AssignmentsPage() {
           </p>
         </div>
 
-        {/* Tombol Create hanya untuk Admin */}
         {isAdmin && <CreateAgendaDialog />}
       </div>
 
-      {/* Main Content */}
       <AgendaView initialData={data} isAdmin={isAdmin} />
     </div>
   );

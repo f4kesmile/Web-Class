@@ -15,11 +15,11 @@ export interface GallerySectionProps {
 export function GallerySection({ galleries }: GallerySectionProps) {
   if (!galleries || galleries.length === 0) {
     return (
-      <div className="w-full py-24 bg-neutral-950 border-t border-neutral-900 text-center">
-        <h2 className="text-xl md:text-5xl font-bold text-neutral-200 mb-8">
+      <div className="w-full py-24 bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-900 text-center transition-colors duration-300">
+        <h2 className="text-xl md:text-5xl font-bold text-neutral-900 dark:text-neutral-200 mb-8">
           Galeri Kegiatan
         </h2>
-        <div className="flex flex-col items-center text-neutral-600">
+        <div className="flex flex-col items-center text-neutral-600 dark:text-neutral-400">
           <ImageOff className="w-12 h-12 mb-4" />
           <p>Belum ada foto kegiatan.</p>
         </div>
@@ -47,7 +47,7 @@ export function GallerySection({ galleries }: GallerySectionProps) {
                   {item.title}
                 </h3>
 
-                <div className="flex items-center gap-2 text-neutral-500">
+                <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
                   <CalendarDays className="w-5 h-5" />
                   <span className="text-sm font-medium">{dateCategory}</span>
                 </div>
@@ -82,8 +82,8 @@ export function GallerySection({ galleries }: GallerySectionProps) {
   });
 
   return (
-    <div className="w-full h-full py-24 bg-neutral-950 border-t border-neutral-900">
-      <h2 className="max-w-7xl pl-4 mx-auto text-xl md:text-5xl font-bold text-neutral-200 font-sans mb-8">
+    <div className="w-full h-full py-24 bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-300">
+      <h2 className="max-w-7xl pl-4 mx-auto text-xl md:text-5xl font-bold text-neutral-900 dark:text-neutral-200 font-sans mb-8">
         Galeri Kegiatan Kelas
       </h2>
       <Carousel items={cards} />

@@ -1,4 +1,5 @@
 "use client";
+
 import { useScroll, useTransform } from "motion/react";
 import React from "react";
 import { GoogleGeminiEffect } from "@/components/ui/google-gemini-effect";
@@ -14,11 +15,11 @@ export function HeroSection() {
   const pathLengthSecond = useTransform(scrollYProgress, [0, 0.8], [0.15, 1.2]);
   const pathLengthThird = useTransform(scrollYProgress, [0, 0.8], [0.1, 1.2]);
   const pathLengthFourth = useTransform(scrollYProgress, [0, 0.8], [0.05, 1.2]);
-  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.8], [0, 1.2]);
+  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.8], [0.1, 1.2]);
 
   return (
     <div
-      className="h-[300vh] bg-white dark:bg-black w-full relative pt-40 overflow-clip"
+      className="h-[300vh] bg-white dark:bg-black w-full relative pt-40 overflow-clip transition-colors duration-300"
       ref={ref}
     >
       <GoogleGeminiEffect

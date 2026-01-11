@@ -1,88 +1,76 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useMemo, useTransition } from "react";
 import { toast } from "sonner";
-import { Loader2, Send } from "lucide-react";
-import { createBroadcast } from "@/actions/settings";
-import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { deleteActiveBroadcast } from "@/actions/settings";
 
-export function BroadcastForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+type BroadcastRow = {
+  title: string;
+  content: string;
+};
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!confirm("Kirim pengumuman ini ke semua user?")) return;
+export type BroadcastFormProps = {
+  currentBroadcast: BroadcastRow | null;
+};
 
-    setIsLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const res = await createBroadcast(formData);
-    setIsLoading(false);
+export function BroadcastForm({ currentBroadcast }: BroadcastFormProps) {
+  const [isPending, startTransition] = useTransition();
 
-    if (res.success) {
-      toast.success(res.message);
-      (e.target as HTMLFormElement).reset();
-      router.refresh();
-    } else {
-      toast.error(res.message);
-    }
-  }
+  const preview = useMemo(() => {
+    if (!currentBroadcast) return null;
+    const { title, content } = currentBroadcast;
+    return { title, content };
+  }, [currentBroadcast]);
+
+  const onDisable = () => {
+    startTransition(async () => {
+      const result = await deleteActiveBroadcast();
+      toast[result.success ? "success" : "error"](result.message);
+    });
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Buat Pengumuman (Broadcast)</CardTitle>
-        <CardDescription>
-          Pesan ini akan muncul di dashboard semua pengguna.
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Judul Pengumuman</Label>
-            <Input
-              name="title"
-              placeholder="Contoh: Perubahan Jadwal UTS"
-              required
-            />
+    <Card className="w-full rounded-2xl border bg-background/70 backdrop-blur p-4 sm:p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-base font-semibold">Broadcast</p>
+          <p className="text-sm text-muted-foreground">
+            Kelola broadcast aktif yang tampil ke user.
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-xl"
+          disabled={isPending || !preview}
+          onClick={onDisable}
+        >
+          Matikan Broadcast Aktif
+        </Button>
+      </div>
+
+      <div className="mt-5">
+        {preview ? (
+          <div className="rounded-2xl border p-4">
+            <p className="text-sm font-semibold">{preview.title}</p>
+            <p
+              className={cn(
+                "mt-2 text-sm text-muted-foreground whitespace-pre-wrap"
+              )}
+            >
+              {preview.content}
+            </p>
           </div>
-          <div className="space-y-2">
-            <Label>Isi Pesan</Label>
-            <Textarea
-              name="content"
-              placeholder="Tulis detail pengumuman..."
-              rows={5}
-              required
-            />
+        ) : (
+          <div className="rounded-2xl border p-4 text-sm text-muted-foreground">
+            Tidak ada broadcast aktif.
           </div>
-        </CardContent>
-        <CardFooter className="border-t px-6 py-4">
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="ml-auto bg-blue-600"
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4 mr-2" />
-            )}{" "}
-            Kirim Broadcast
-          </Button>
-        </CardFooter>
-      </form>
+        )}
+      </div>
     </Card>
   );
 }

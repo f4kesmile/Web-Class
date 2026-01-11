@@ -1,9 +1,14 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { Settings } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { Role } from "@prisma/client";
-import { getSiteSettings, getAllUsers, getLogs } from "@/actions/settings";
-import { SettingsTabs } from "@/components/dashboard/settings/settings-tabs";
+import {
+  getSiteSettings,
+  getAllUsers,
+  getLogs,
+  getActiveBroadcast,
+} from "@/actions/settings";
+import SettingsTabs from "@/components/dashboard/settings/settings-tabs";
 
 export const metadata: Metadata = {
   title: "Pengaturan | Web-Class",
@@ -11,7 +16,8 @@ export const metadata: Metadata = {
 
 export default async function SettingsPage() {
   const user = await getCurrentUser();
-  const isAdmin = user?.role === Role.ADMIN || user?.role === Role.SUPER_ADMIN;
+  const role = user?.role ?? Role.USER;
+  const isAdmin = role === Role.ADMIN || role === Role.SUPER_ADMIN;
 
   if (!isAdmin) {
     return (
@@ -21,19 +27,18 @@ export default async function SettingsPage() {
     );
   }
 
-  // Fetch Data di Server (Parallel Fetching agar cepat)
-  const [siteSettings, users, logs] = await Promise.all([
+  const [settings, users, logs, activeBroadcast] = await Promise.all([
     getSiteSettings(),
     getAllUsers(),
     getLogs(),
+    getActiveBroadcast(),
   ]);
 
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-6xl mx-auto">
-      {/* Header Statis */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Settings className="w-8 h-8 text-slate-700 dark:text-slate-200" />
+          <Settings className="w-8 h-8 text-blue-700" />
           Pengaturan Sistem
         </h1>
         <p className="text-muted-foreground mt-1">
@@ -41,12 +46,12 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      {/* Panggil Client Component untuk UI Tabs */}
       <SettingsTabs
-        settings={siteSettings}
+        settings={settings}
         users={users}
         logs={logs}
-        currentUserRole={user?.role || "USER"}
+        currentUserRole={role}
+        activeBroadcast={activeBroadcast}
       />
     </div>
   );

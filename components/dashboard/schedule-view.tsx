@@ -7,7 +7,7 @@ import { Calendar, Clock, MapPin, User, BookOpen, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { deleteSchedule } from "@/actions/schedule";
 import { toast } from "sonner";
-import { EditScheduleDialog } from "./edit-schedule-dialog"; // Import Edit Dialog
+import { EditScheduleDialog } from "./edit-schedule-dialog";
 
 import {
   AlertDialog,
@@ -54,7 +54,7 @@ export function ScheduleView({ initialData, isAdmin }: ScheduleViewProps) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Calendar className="w-8 h-8 text-blue-500" />
+            <Calendar className="w-8 h-8 text-blue-600" />
             Jadwal Kuliah
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -71,14 +71,14 @@ export function ScheduleView({ initialData, isAdmin }: ScheduleViewProps) {
             className={cn(
               "relative px-4 py-2 rounded-lg text-sm font-medium transition-colors outline-none",
               activeDay === day.id
-                ? "text-primary"
-                : "text-muted-foreground hover:text-primary/80"
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-muted-foreground hover:text-blue-600/80"
             )}
           >
             {activeDay === day.id && (
               <motion.div
                 layoutId="active-pill"
-                className="absolute inset-0 bg-white dark:bg-zinc-800 shadow-sm rounded-lg border border-black/5 dark:border-white/10"
+                className="absolute inset-0 bg-white dark:bg-zinc-900 shadow-sm rounded-lg border border-blue-100 dark:border-blue-900"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
             )}
@@ -119,26 +119,65 @@ export function ScheduleView({ initialData, isAdmin }: ScheduleViewProps) {
   );
 }
 
-function ScheduleCard({ data, index, isAdmin, onDelete }: any) {
+interface ScheduleCardProps {
+  data: Schedule;
+  index: number;
+  isAdmin: boolean;
+  onDelete: () => void;
+}
+
+function ScheduleCard({ data, index, isAdmin, onDelete }: ScheduleCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, delay: index * 0.1 }}
-      className="group relative overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-blue-500/50"
+      className="group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-blue-500/30 flex flex-col justify-between h-full"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 dark:from-blue-950/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+      <div className="relative z-10 space-y-4 mb-4">
+        <div className="flex justify-between items-start gap-4">
+          <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg shrink-0">
+            <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-xs font-mono font-medium shrink-0">
+            <Clock className="w-3.5 h-3.5" />
+            {data.startTime} - {data.endTime}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="font-bold text-lg leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {data.subject}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {data.credits ? `${data.credits} SKS` : "Mata Kuliah Wajib"}
+          </p>
+        </div>
+
+        <div className="space-y-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4 shrink-0" />
+            <span className="truncate" title={data.lecturer || "-"}>
+              {data.lecturer || "-"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 shrink-0" />
+            <span>{data.room || "Online"}</span>
+          </div>
+        </div>
+      </div>
 
       {isAdmin && (
-        <div className="absolute top-4 right-4 flex gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-          {/* 1. TOMBOL EDIT */}
+        <div className="relative z-20 pt-4 border-t border-border flex justify-end gap-2 mt-auto opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300">
           <EditScheduleDialog data={data} />
 
-          {/* 2. TOMBOL HAPUS */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-full transition-all bg-white shadow-sm border">
+              <button className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50/50 rounded-md transition-colors">
                 <Trash2 className="w-4 h-4" />
               </button>
             </AlertDialogTrigger>
@@ -154,7 +193,7 @@ function ScheduleCard({ data, index, isAdmin, onDelete }: any) {
                 <AlertDialogCancel>Batal</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={onDelete}
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-red-600 hover:bg-red-700 text-white"
                 >
                   Hapus
                 </AlertDialogAction>
@@ -163,43 +202,6 @@ function ScheduleCard({ data, index, isAdmin, onDelete }: any) {
           </AlertDialog>
         </div>
       )}
-
-      <div className="relative z-10 space-y-4">
-        <div className="flex justify-between items-start gap-4">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
-            <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted text-xs font-mono font-medium">
-            <Clock className="w-3.5 h-3.5" />
-            {data.startTime} - {data.endTime}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="font-bold text-lg leading-tight group-hover:text-blue-500 transition-colors pr-6">
-            {data.subject}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {data.credits ? `${data.credits} SKS` : "Mata Kuliah Wajib"}
-          </p>
-        </div>
-
-        <div className="pt-4 border-t flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4" />
-            <span
-              className="truncate max-w-[100px]"
-              title={data.lecturer || "-"}
-            >
-              {data.lecturer || "-"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            <span>{data.room || "Online"}</span>
-          </div>
-        </div>
-      </div>
     </motion.div>
   );
 }

@@ -99,6 +99,7 @@ model Account {
   providerId            String
   accessToken           String?   @db.Text
   refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
@@ -114,7 +115,7 @@ model Account {
 model Verification {
   id         String   @id @default(cuid())
   identifier String
-  value      String
+  value      String   @db.Text
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -175,7 +176,7 @@ model SiteSettings {
 
   className    String @default("Informatika 4C")
   semester     String @default("4")
-  academicYear String @default("2024/2025")
+  academicYear String @default("2025/2026")
 
   supportEmail String?
   instagram    String?

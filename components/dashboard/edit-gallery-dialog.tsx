@@ -46,7 +46,7 @@ export function EditGalleryDialog({ data }: { data: Gallery }) {
       <DialogTrigger asChild>
         <button
           onClick={(e) => e.stopPropagation()}
-          className="p-1.5 bg-blue-500/20 text-blue-400 rounded-full hover:bg-blue-500 hover:text-white transition-colors"
+          className="p-1.5 text-white/80 hover:text-white hover:bg-white/20 rounded-md transition-colors"
         >
           <Pencil className="w-4 h-4" />
         </button>

@@ -35,11 +35,8 @@ export async function sendEmail({ to, subject, html }: SendEmailProps) {
       html,
     });
 
-    // Console.log dihapus untuk production
     return { success: true };
   } catch (error) {
-    // Console.error tetap disarankan ada agar Anda tahu jika SMTP mati/error
-    // Jika benar-benar ingin bersih total, hapus baris di bawah ini:
     console.error("SMTP Error:", error); 
     return { success: false, error };
   }

@@ -53,7 +53,7 @@ export function EditScheduleDialog({ data }: EditScheduleDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="p-2 text-muted-foreground hover:text-blue-500 hover:bg-blue-50 rounded-full transition-all bg-white shadow-sm border">
+        <button className="p-2 text-muted-foreground/50 hover:text-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 rounded-md transition-all">
           <Pencil className="w-4 h-4" />
         </button>
       </DialogTrigger>

@@ -10,7 +10,6 @@ import {
   Clock,
   FileText,
   GraduationCap,
-  MoreVertical,
   Trash2,
   AlertCircle,
   Pencil,
@@ -19,13 +18,7 @@ import { toast } from "sonner";
 import { deleteAgenda } from "@/actions/agenda";
 import { cn } from "@/lib/utils";
 import { EditAgendaDialog } from "./edit-agenda-dialog";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Agenda } from "@prisma/client";
 
 import {
   AlertDialog,
@@ -40,7 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface AgendaViewProps {
-  initialData: any[];
+  initialData: Agenda[];
   isAdmin: boolean;
 }
 
@@ -91,7 +84,7 @@ export function AgendaView({ initialData, isAdmin }: AgendaViewProps) {
               "px-4 py-2 rounded-full text-sm font-medium transition-all border",
               filter === tab.id
                 ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20"
-                : "bg-background border-border text-muted-foreground hover:border-blue-500/50 hover:text-foreground"
+                : "bg-background border-border text-muted-foreground hover:border-blue-600/50 hover:text-foreground"
             )}
           >
             {tab.label}
@@ -133,6 +126,15 @@ export function AgendaView({ initialData, isAdmin }: AgendaViewProps) {
   );
 }
 
+interface AgendaCardProps {
+  data: Agenda;
+  isAdmin: boolean;
+  isCompleted: boolean;
+  onToggle: () => void;
+  onDelete: () => void;
+  index: number;
+}
+
 function AgendaCard({
   data,
   isAdmin,
@@ -140,7 +142,7 @@ function AgendaCard({
   onToggle,
   onDelete,
   index,
-}: any) {
+}: AgendaCardProps) {
   const [showEdit, setShowEdit] = useState(false);
 
   const getTypeColor = (type: string) => {
@@ -150,7 +152,7 @@ function AgendaCard({
       case "EVENT":
         return "text-amber-500 bg-amber-500/10 border-amber-500/20";
       default:
-        return "text-blue-500 bg-blue-500/10 border-blue-500/20";
+        return "text-blue-600 bg-blue-500/10 border-blue-500/20";
     }
   };
   const typeLabel =
@@ -176,7 +178,7 @@ function AgendaCard({
         exit={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
         className={cn(
-          "group relative flex flex-col p-5 rounded-2xl border bg-card transition-all hover:shadow-lg",
+          "group relative flex flex-col p-5 rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-blue-500/30",
           isCompleted ? "opacity-60 grayscale-[0.5]" : "opacity-100"
         )}
       >
@@ -191,55 +193,47 @@ function AgendaCard({
           </span>
 
           {isAdmin && (
-            <AlertDialog>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-muted outline-none">
-                  <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => setShowEdit(true)}
-                    className="cursor-pointer"
-                  >
-                    <Pencil className="w-4 h-4 mr-2" /> Edit Agenda
-                  </DropdownMenuItem>
+            <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200">
+              <button
+                onClick={() => setShowEdit(true)}
+                className="p-1.5 text-muted-foreground/50 hover:text-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 rounded-md transition-all"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
 
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
-                      onSelect={(e) => e.preventDefault()}
-                      className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="p-1.5 text-muted-foreground/50 hover:text-red-500 hover:bg-red-50/50 dark:hover:bg-red-900/20 rounded-md transition-all">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Hapus Agenda?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Agenda <strong>{data.title}</strong> akan dihapus
+                      permanen.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={onDelete}
+                      className="bg-red-600 hover:bg-red-700 text-white"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" /> Hapus Agenda
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Hapus Agenda?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Agenda <strong>{data.title}</strong> akan dihapus permanen.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={onDelete}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Hapus
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                      Hapus
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           )}
         </div>
 
         <div className="flex-1 space-y-2">
           <h3
             className={cn(
-              "font-bold text-lg leading-tight",
+              "font-bold text-lg leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
               isCompleted && "line-through text-muted-foreground"
             )}
           >
@@ -281,7 +275,7 @@ function AgendaCard({
             className={cn(
               "p-2 rounded-full transition-colors",
               isCompleted
-                ? "text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20"
+                ? "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >

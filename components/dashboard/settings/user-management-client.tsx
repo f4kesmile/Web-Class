@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import React, { useMemo, useState, useTransition } from "react";
+import Image from "next/image";
+import { toast } from "sonner";
+import { Role } from "@prisma/client";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -19,176 +15,214 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Mail, Ban, ShieldCheck } from "lucide-react"; // Hapus Loader2 jika tidak dipakai di sini
-import { updateUserRole, toggleBanUser, inviteUser } from "@/actions/settings";
-import { Role } from "@prisma/client";
-import { useRouter } from "next/navigation";
-import { SendReminderDialog } from "./send-reminder-dialog"; // 1. IMPORT DIALOG BARU
+import {
+  banUser,
+  unbanUser,
+  toggleBanUser,
+  updateUserRole,
+} from "@/actions/settings";
+
+export interface UserProps {
+  id: string;
+  name: string | null;
+  email: string;
+  role: Role;
+  isBanned: boolean;
+  image: string | null;
+}
+
+interface UserManagementClientProps {
+  users: UserProps[];
+  currentUserRole: Role;
+}
+
+type RoleOption = {
+  value: Role;
+  label: string;
+};
 
 export function UserManagementClient({
   users,
   currentUserRole,
-}: {
-  users: any[];
-  currentUserRole: string;
-}) {
-  const [loadingAction, setLoadingAction] = useState<string | null>(null);
-  const router = useRouter();
-  const isSuperAdmin = currentUserRole === "SUPER_ADMIN";
+}: UserManagementClientProps) {
+  const [isPending, startTransition] = useTransition();
+  const [search, setSearch] = useState<string>("");
 
-  // ... (Fungsi handleRoleChange, handleBan, handleInvite TETAP SAMA seperti sebelumnya) ...
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    setLoadingAction(userId);
-    const res = await updateUserRole(userId, newRole as Role);
-    setLoadingAction(null);
-    if (res.success) {
-      toast.success(res.message);
-      router.refresh();
-    } else toast.error(res.message);
+  const roleOptions = useMemo<RoleOption[]>(
+    () => [
+      { value: Role.USER, label: "USER" },
+      { value: Role.ADMIN, label: "ADMIN" },
+      { value: Role.SUPER_ADMIN, label: "SUPER_ADMIN" },
+    ],
+    []
+  );
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter(({ name, email }) => {
+      const n = (name ?? "").toLowerCase();
+      const e = email.toLowerCase();
+      return n.includes(q) || e.includes(q);
+    });
+  }, [users, search]);
+
+  const canManage =
+    currentUserRole === Role.ADMIN || currentUserRole === Role.SUPER_ADMIN;
+  const canManageRole = currentUserRole === Role.SUPER_ADMIN;
+
+  const onChangeRole = (userId: string, nextRole: Role) => {
+    if (!canManageRole) return;
+
+    startTransition(async () => {
+      const result = await updateUserRole(userId, nextRole);
+      toast[result.success ? "success" : "error"](result.message);
+    });
   };
 
-  const handleBan = async (userId: string) => {
-    if (!confirm("Ubah status BAN user ini?")) return;
-    setLoadingAction(userId);
-    const res = await toggleBanUser(userId);
-    setLoadingAction(null);
-    if (res.success) {
-      toast.success(res.message);
-      router.refresh();
-    } else toast.error(res.message);
+  const onToggleBan = (userId: string) => {
+    if (!canManageRole) return;
+
+    startTransition(async () => {
+      const result = await toggleBanUser(userId);
+      toast[result.success ? "success" : "error"](result.message);
+    });
   };
 
-  const handleInvite = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const email = new FormData(e.currentTarget).get("email") as string;
-    if (!email) return;
-    toast.info("Mengirim undangan...");
-    const res = await inviteUser(email);
-    if (res.success) toast.success(res.message);
-    else toast.error(res.message);
-    (e.target as HTMLFormElement).reset();
+  const onBan = (userId: string) => {
+    if (!canManageRole) return;
+
+    startTransition(async () => {
+      const result = await banUser(userId);
+      toast[result.success ? "success" : "error"](result.message);
+    });
   };
-  // ... (Sampai sini sama) ...
+
+  const onUnban = (userId: string) => {
+    if (!canManageRole) return;
+
+    startTransition(async () => {
+      const result = await unbanUser(userId);
+      toast[result.success ? "success" : "error"](result.message);
+    });
+  };
+
+  if (!canManage) {
+    return (
+      <Card className="w-full rounded-2xl border bg-background/70 backdrop-blur p-6 text-sm text-muted-foreground">
+        Anda tidak memiliki akses untuk mengelola user.
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* INVITE SECTION (Tetap Sama) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Mail className="w-4 h-4" /> Undang Pengguna Baru
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleInvite} className="flex gap-2">
-            <Input
-              name="email"
-              type="email"
-              placeholder="Masukkan email mahasiswa..."
-              required
-            />
-            <Button type="submit" variant="secondary">
-              Kirim Undangan
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <Card className="w-full rounded-2xl border bg-background/70 backdrop-blur p-4 sm:p-6">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-base font-semibold">Manajemen User</p>
+          <p className="text-sm text-muted-foreground">
+            Kelola role dan status user.
+          </p>
+        </div>
 
-      {/* USER LIST */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Daftar Pengguna</CardTitle>
-          <CardDescription>
-            Total {users.length} pengguna terdaftar.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {users.map((u) => (
-              <div
-                key={u.id}
-                className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border rounded-lg bg-card/50 hover:bg-card transition-colors"
-              >
-                {/* INFO USER */}
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={u.image} />
-                    <AvatarFallback>
-                      {u.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">{u.name}</p>
-                      {u.isBanned && (
-                        <Badge
-                          variant="destructive"
-                          className="text-[10px] px-1 py-0 h-5"
-                        >
-                          BANNED
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{u.email}</p>
-                  </div>
+        <input
+          value={search}
+          onChange={({ target: { value } }) => setSearch(value)}
+          placeholder="Cari nama / email"
+          className="h-10 w-[180px] sm:w-[240px] rounded-xl border bg-background px-3 text-sm outline-none"
+        />
+      </div>
+
+      <div className="mt-5 space-y-3">
+        {filtered.map(({ id, name, email, role, isBanned, image }) => {
+          const displayName = name ?? "Unknown";
+          return (
+            <div
+              key={id}
+              className={cn(
+                "flex items-center justify-between gap-3 rounded-2xl border p-3 sm:p-4",
+                isBanned ? "opacity-80" : "opacity-100"
+              )}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl border bg-muted">
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt={displayName}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : null}
                 </div>
 
-                {/* ACTION BUTTONS */}
-                <div className="flex items-center gap-2">
-                  {/* 2. TOMBOL KIRIM PESAN (BARU) */}
-                  {/* Muncul untuk semua Admin */}
-                  <SendReminderDialog
-                    userId={u.id}
-                    userName={u.name}
-                    email={u.email}
-                  />
-
-                  {/* ROLE SELECTOR */}
-                  <div className="w-32">
-                    <Select
-                      defaultValue={u.role}
-                      onValueChange={(val) => handleRoleChange(u.id, val)}
-                      disabled={
-                        !isSuperAdmin ||
-                        loadingAction === u.id ||
-                        u.role === "SUPER_ADMIN"
-                      }
-                    >
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="USER">User</SelectItem>
-                        <SelectItem value="ADMIN">Admin</SelectItem>
-                        <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* BAN BUTTON */}
-                  {isSuperAdmin && u.role !== "SUPER_ADMIN" && (
-                    <Button
-                      variant={u.isBanned ? "outline" : "destructive"}
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => handleBan(u.id)}
-                      disabled={loadingAction === u.id}
-                      title={u.isBanned ? "Aktifkan User" : "Ban User"}
-                    >
-                      {u.isBanned ? (
-                        <ShieldCheck className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <Ban className="w-4 h-4" />
-                      )}
-                    </Button>
-                  )}
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate">
+                    {displayName}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {email}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+
+              <div className="flex items-center gap-2">
+                {isBanned ? (
+                  <Badge variant="destructive">BANNED</Badge>
+                ) : (
+                  <Badge variant="secondary">ACTIVE</Badge>
+                )}
+
+                <Select
+                  value={role}
+                  onValueChange={(value) => onChangeRole(id, value as Role)}
+                  disabled={!canManageRole || isPending}
+                >
+                  <SelectTrigger className="h-10 w-[150px] rounded-xl">
+                    <SelectValue placeholder="Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roleOptions.map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 rounded-xl"
+                  disabled={!canManageRole || isPending}
+                  onClick={() => onToggleBan(id)}
+                >
+                  Toggle
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="h-10 rounded-xl"
+                  disabled={!canManageRole || isPending || isBanned}
+                  onClick={() => onBan(id)}
+                >
+                  Ban
+                </Button>
+
+                <Button
+                  type="button"
+                  className="h-10 rounded-xl"
+                  disabled={!canManageRole || isPending || !isBanned}
+                  onClick={() => onUnban(id)}
+                >
+                  Unban
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
   );
 }

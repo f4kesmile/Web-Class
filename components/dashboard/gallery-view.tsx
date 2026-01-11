@@ -57,7 +57,14 @@ export function GalleryView({ initialData, isAdmin }: GalleryViewProps) {
   );
 }
 
-function GalleryCard({ data, isAdmin, index, onDelete }: any) {
+interface GalleryCardProps {
+  data: Gallery;
+  isAdmin: boolean;
+  index: number;
+  onDelete: () => void;
+}
+
+function GalleryCard({ data, isAdmin, index, onDelete }: GalleryCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -85,7 +92,7 @@ function GalleryCard({ data, isAdmin, index, onDelete }: any) {
         </DialogContent>
       </Dialog>
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
         <p className="text-white font-medium text-sm line-clamp-2">
           {data.title}
         </p>
@@ -103,7 +110,7 @@ function GalleryCard({ data, isAdmin, index, onDelete }: any) {
                 <AlertDialogTrigger asChild>
                   <button
                     onClick={(e) => e.stopPropagation()}
-                    className="p-1.5 bg-red-500/20 text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-colors"
+                    className="p-1.5 text-white/80 hover:text-red-400 hover:bg-white/20 rounded-md transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -124,7 +131,7 @@ function GalleryCard({ data, isAdmin, index, onDelete }: any) {
                         e.stopPropagation();
                         onDelete();
                       }}
-                      className="bg-red-600 hover:bg-red-700"
+                      className="bg-red-600 hover:bg-red-700 text-white"
                     >
                       Ya, Hapus
                     </AlertDialogAction>
