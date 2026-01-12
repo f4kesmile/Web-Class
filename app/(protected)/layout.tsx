@@ -10,7 +10,9 @@ import {
 import { GridBackground } from "@/components/ui/grid-background";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Toaster } from "sonner";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Home } from "lucide-react";
 
 export default async function ProtectedLayout({
   children,
@@ -40,6 +42,16 @@ export default async function ProtectedLayout({
             </div>
 
             <div className="ml-auto flex items-center gap-4 px-4">
+              <Link href="/" title="Ke Beranda">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="gap-2 rounded-full text-muted-foreground hover:text-foreground h-9 px-3"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="hidden sm:inline">Beranda</span>
+                </Button>
+              </Link>
               <AnimatedThemeToggler />
               <UserButton user={user} />
             </div>
