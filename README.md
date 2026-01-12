@@ -114,10 +114,6 @@ SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="465"
 SMTP_USER="emailmudisini@gmail.com"
 SMTP_PASSWORD="app_password_gmail"
-
-# Super Admin Security
-# Masukkan email developer/pemilik agar tidak bisa dihapus/ban oleh admin lain
-SUPERADMIN_IMMUTABLE_EMAILS="developer@gmail.com,ketua@gmail.com"
 ```
 
 ### 4. Setup Database
