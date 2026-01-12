@@ -367,20 +367,79 @@ export async function unbanUser(targetUserId: string): Promise<ActionResult> {
   }
 }
 
+function getEmailFooter() {
+  const year = new Date().getFullYear();
+  const appName = process.env.NEXT_PUBLIC_SITE_NAME || "Aplikasi Kelas";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+
+  return `
+    <div style="background-color: #f4f4f5; padding: 24px; text-align: center; border-top: 1px solid #e4e4e7;">
+      <p style="font-size: 12px; color: #71717a; margin: 0 0 8px 0; line-height: 1.5;">
+        Pesan ini dikirim secara otomatis oleh sistem <strong>${appName}</strong>.<br>
+        Mohon jangan membalas email ini secara langsung.
+      </p>
+      <p style="font-size: 11px; color: #a1a1aa; margin: 0;">
+        &copy; ${year} ${appName}. All rights reserved.<br>
+        <a href="${appUrl}" style="color: #a1a1aa; text-decoration: underline;">Privacy Policy</a> • <a href="${appUrl}" style="color: #a1a1aa; text-decoration: underline;">Support</a>
+      </p>
+    </div>
+  `;
+}
+
 export async function inviteUser(email: string): Promise<ActionResult> {
   try {
     const { id: userId } = await assertAdmin();
-
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-    const html = `
-      <h1>Halo!</h1>
-      <p>Anda diundang untuk bergabung ke aplikasi manajemen kelas kami.</p>
-      <p>Silakan daftar menggunakan email ini di: <a href="${appUrl}/sign-up">Link Pendaftaran</a></p>
-      <br/>
-      <p>Salam,<br/>Pengurus Kelas</p>
+    const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Web Kelas";
+
+    const userPlusIcon = `
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#18181b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="8.5" cy="7" r="4"></circle>
+        <line x1="20" y1="8" x2="20" y2="14"></line>
+        <line x1="23" y1="11" x2="17" y2="11"></line>
+      </svg>
     `;
 
-    const emailResult = await sendEmail({ to: email, subject: "Undangan Bergabung", html });
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Undangan</title>
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; margin: 0; padding: 0;">
+        
+        <div style="max-width: 480px; margin: 0 auto; padding: 64px 24px 32px 24px; text-align: center;">
+          
+          <div style="margin-bottom: 32px;">
+            ${userPlusIcon}
+          </div>
+
+          <h1 style="color: #18181b; font-size: 24px; font-weight: 700; margin: 0 0 16px 0; letter-spacing: -0.5px;">
+            Undangan Masuk
+          </h1>
+          
+          <p style="color: #52525b; font-size: 16px; line-height: 1.6; margin: 0 0 40px 0;">
+            Anda telah diundang untuk bergabung ke <strong>${siteName}</strong>.
+          </p>
+
+          <div>
+            <a href="${appUrl}/sign-up" style="display: inline-block; background-color: #18181b; color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 100px; font-weight: 600; font-size: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+              Gabung Sekarang
+            </a>
+          </div>
+
+        </div>
+
+        <div style="max-width: 480px; margin: 0 auto; margin-top: 32px;">
+            ${getEmailFooter()}
+        </div>
+      </body>
+      </html>
+    `;
+
+    const emailResult = await sendEmail({ to: email, subject: `Undangan Bergabung ke ${siteName}`, html });
     if (!emailResult.success) return { success: false, message: "Gagal mengirim email (Cek konfigurasi SMTP)" };
 
     await createLog(userId, "INVITE_USER", `Mengundang email ${email}`);
@@ -398,18 +457,59 @@ export async function sendUserReminder(targetUserId: string, message: string): P
     if (!targetUser) return { success: false, message: "User tidak ditemukan" };
 
     const { email, name } = targetUser;
+    const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Web Kelas";
 
-    const html = `
-      <h3>Halo ${name ?? "User"},</h3>
-      <p>Ada pesan penting untukmu:</p>
-      <blockquote style="border-left: 4px solid #3b82f6; padding-left: 10px; color: #555;">
-        ${message.replace(/\n/g, "<br>")}
-      </blockquote>
-      <br/>
-      <p>Harap segera ditindaklanjuti. Terima kasih!</p>
+    const bellIcon = `
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+      </svg>
     `;
 
-    const emailResult = await sendEmail({ to: email, subject: "📢 Pesan dari Pengurus Kelas", html });
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pesan Baru</title>
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; margin: 0; padding: 0;">
+        
+        <div style="max-width: 480px; margin: 0 auto; padding: 64px 24px 32px 24px; text-align: center;">
+          
+          <div style="margin-bottom: 32px;">
+            ${bellIcon}
+          </div>
+
+          <h1 style="color: #18181b; font-size: 24px; font-weight: 700; margin: 0 0 16px 0; letter-spacing: -0.5px;">
+            Pesan Penting
+          </h1>
+          
+          <p style="color: #52525b; font-size: 16px; margin: 0 0 32px 0;">
+            Halo <strong>${name}</strong>, ada pesan untuk Anda:
+          </p>
+
+          <div style="background-color: #fffbeb; padding: 24px; border-radius: 12px; margin-bottom: 40px;">
+            <p style="color: #92400e; font-size: 16px; line-height: 1.6; margin: 0; font-style: italic;">
+              "${message.replace(/\n/g, "<br>")}"
+            </p>
+          </div>
+
+          <div>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="color: #71717a; text-decoration: none; font-weight: 600; font-size: 14px;">
+              Buka Dashboard Saya &rarr;
+            </a>
+          </div>
+        </div>
+
+        <div style="max-width: 480px; margin: 0 auto; margin-top: 32px;">
+            ${getEmailFooter()}
+        </div>
+      </body>
+      </html>
+    `;
+
+    const emailResult = await sendEmail({ to: email, subject: `Pesan dari ${siteName}`, html });
     if (!emailResult.success) return { success: false, message: "Gagal mengirim email." };
 
     await createLog(userId, "SEND_MESSAGE", `Mengirim pesan ke ${email}`);

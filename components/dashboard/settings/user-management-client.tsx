@@ -5,6 +5,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { Role } from "@/lib/enums";
 import { cn } from "@/lib/utils";
+import { InviteUserDialog } from "./invite-user-dialog";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -16,10 +17,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { banUser, unbanUser, updateUserRole } from "@/actions/settings";
 import { SendReminderDialog } from "@/components/dashboard/settings/send-reminder-dialog";
 import type { UpcomingAgendaRow } from "@/components/dashboard/settings/settings-tabs";
-import { Ban, CheckCircle2, Shield, UserRound } from "lucide-react";
+import { Ban, CheckCircle2, Shield, UserPlus } from "lucide-react";
 
 export type UserProps = {
   id: string;
@@ -200,7 +212,7 @@ const UserManagementClient = ({
         )}
       >
         <p className="text-sm text-muted-foreground">
-          Anda tidak memiliki akses untuk melihat manajemen user.
+          Anda tidak memiliki akses untuk melihat management user.
         </p>
       </Card>
     );
@@ -221,18 +233,24 @@ const UserManagementClient = ({
             </div>
             <div>
               <p className="text-lg font-semibold">Users</p>
-              <p className="text-sm text-muted-foreground">
-                Admin hanya kirim reminder. Super Admin mengelola role dan ban.
-              </p>
+              <p className="text-sm text-muted-foreground">Kelola pengguna</p>
             </div>
           </div>
 
-          <Input
-            value={search}
-            onChange={({ target: { value } }) => setSearch(value)}
-            placeholder="Cari nama / email"
-            className="h-11 rounded-2xl w-full sm:w-[340px]"
-          />
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Input
+              value={search}
+              onChange={({ target: { value } }) => setSearch(value)}
+              placeholder="Cari nama / email"
+              className="h-11 rounded-2xl w-full sm:w-[240px]"
+            />
+            <InviteUserDialog>
+              <Button className="h-11 rounded-2xl">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Undang
+              </Button>
+            </InviteUserDialog>
+          </div>
         </div>
 
         {!canSensitive ? (
@@ -320,35 +338,65 @@ const UserManagementClient = ({
                     ) : null}
 
                     {canSensitive ? (
-                      <Button
-                        type="button"
-                        variant={isBanned ? "outline" : "destructive"}
-                        className={cn(
-                          "h-11 w-11 p-0 rounded-2xl",
-                          isBanned
-                            ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
-                            : ""
-                        )}
-                        disabled={!banAllowed || isPending}
-                        onClick={() => onBanOrUnban(id, isBanned)}
-                        title={
-                          !banAllowed
-                            ? immutableTarget
-                              ? "Target tidak bisa disentuh"
-                              : id === currentUserId
-                              ? "Tidak bisa membanned diri sendiri"
-                              : "Tidak diizinkan"
-                            : isBanned
-                            ? "Unban"
-                            : "Ban"
-                        }
-                      >
-                        {isBanned ? (
-                          <CheckCircle2 className="h-5 w-5 text-primary" />
-                        ) : (
-                          <Ban className="h-5 w-5" />
-                        )}
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            type="button"
+                            variant={isBanned ? "outline" : "destructive"}
+                            className={cn(
+                              "h-11 w-11 p-0 rounded-2xl",
+                              isBanned
+                                ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
+                                : ""
+                            )}
+                            disabled={!banAllowed || isPending}
+                            title={
+                              !banAllowed
+                                ? immutableTarget
+                                  ? "Target tidak bisa disentuh"
+                                  : id === currentUserId
+                                  ? "Tidak bisa membanned diri sendiri"
+                                  : "Tidak diizinkan"
+                                : isBanned
+                                ? "Unban"
+                                : "Ban"
+                            }
+                          >
+                            {isBanned ? (
+                              <CheckCircle2 className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Ban className="h-5 w-5" />
+                            )}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {isBanned
+                                ? "Aktifkan User Kembali?"
+                                : "Ban User Ini?"}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {isBanned
+                                ? `Apakah Anda yakin ingin mengaktifkan kembali akun milik ${displayName}? User akan bisa login kembali.`
+                                : `Apakah Anda yakin ingin memblokir ${displayName}? User tidak akan bisa login ke aplikasi.`}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => onBanOrUnban(id, isBanned)}
+                              className={
+                                isBanned
+                                  ? "bg-primary"
+                                  : "bg-destructive hover:bg-destructive/90"
+                              }
+                            >
+                              {isBanned ? "Ya, Aktifkan" : "Ya, Ban User"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     ) : null}
                   </div>
                 </div>
