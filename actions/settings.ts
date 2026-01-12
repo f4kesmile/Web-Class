@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { Role } from "@prisma/client";
+import { Role, AgendaType } from "@/lib/enums";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { sendEmail } from "@/lib/mail";
@@ -29,7 +29,6 @@ const SiteSettingsSchema = z.object({
     .optional(),
 });
 
-
 type ActionResult = { success: true; message: string } | { success: false; message: string };
 
 type SettingsRow = {
@@ -45,7 +44,6 @@ type SettingsRow = {
   whatsapp: string | null;
   updatedAt: Date;
 };
-
 
 type SafeUserRow = {
   id: string;
@@ -97,7 +95,13 @@ async function getTargetUserCore(targetUserId: string) {
   });
 
   if (!target) throw new Error("USER_NOT_FOUND");
-  return target;
+
+  const { role, ...rest } = target;
+
+  return {
+    ...rest,
+    role: role as unknown as Role,
+  };
 }
 
 function isImmutableSuperAdmin(target: { email: string; role: Role }) {
@@ -110,32 +114,37 @@ function assertNotSelf(actorId: string, targetUserId: string) {
   if (actorId === targetUserId) throw new Error("CANNOT_TOUCH_SELF");
 }
 
-
 async function assertAdmin(): Promise<{ id: string; role: Role; isBanned: boolean; email: string }> {
   const user = await getCurrentUser();
   if (!user) throw new Error("UNAUTHORIZED");
-  const { role, isBanned, id, email } = user;
-  if (isBanned) throw new Error("BANNED");
+
+  const { role: prismaRole, ...rest } = user;
+  const role = prismaRole as unknown as Role;
+
+  if (rest.isBanned) throw new Error("BANNED");
   if (role !== Role.ADMIN && role !== Role.SUPER_ADMIN) throw new Error("FORBIDDEN");
-  return { id, role, isBanned, email };
+
+  return { ...rest, role };
 }
 
 async function assertSuperAdmin(): Promise<{ id: string; role: Role; isBanned: boolean; email: string }> {
   const user = await getCurrentUser();
   if (!user) throw new Error("UNAUTHORIZED");
-  const { role, isBanned, id, email } = user;
-  if (isBanned) throw new Error("BANNED");
+
+  const { role: prismaRole, ...rest } = user;
+  const role = prismaRole as unknown as Role;
+
+  if (rest.isBanned) throw new Error("BANNED");
   if (role !== Role.SUPER_ADMIN) throw new Error("FORBIDDEN");
-  return { id, role, isBanned, email };
+
+  return { ...rest, role };
 }
 
 async function createLog(userId: string, action: string, details: string) {
-  // 1. Create the new log
   await prisma.activityLog.create({
     data: { userId, action, details },
   });
 
-  // 2. Auto-prune: Keep only the latest 50 logs
   const count = await prisma.activityLog.count();
   if (count > 50) {
     const logsToKeep = await prisma.activityLog.findMany({
@@ -214,7 +223,6 @@ export async function getSiteSettings(): Promise<SettingsRow | null> {
   };
 }
 
-
 export async function getAllUsers(): Promise<SafeUserRow[]> {
   try {
     await assertAdmin();
@@ -231,7 +239,13 @@ export async function getAllUsers(): Promise<SafeUserRow[]> {
       },
     });
 
-    return users;
+    return users.map((user) => {
+      const { role, ...rest } = user;
+      return {
+        ...rest,
+        role: role as unknown as Role,
+      };
+    });
   } catch {
     return [];
   }
@@ -250,7 +264,7 @@ export async function updateUserRole(targetUserId: string, newRole: Role): Promi
 
     await prisma.user.update({
       where: { id: targetUserId },
-      data: { role: newRole },
+      data: { role: newRole as unknown as import("@prisma/client").Role },
     });
 
     await createLog(actorId, "UPDATE_ROLE", `Mengubah role user ${targetUserId} menjadi ${newRole}`);
@@ -265,7 +279,6 @@ export async function updateUserRole(targetUserId: string, newRole: Role): Promi
     return { success: false, message: "Hanya Super Admin yang bisa mengubah Role" };
   }
 }
-
 
 export async function toggleBanUser(targetUserId: string): Promise<ActionResult> {
   try {
@@ -298,7 +311,6 @@ export async function toggleBanUser(targetUserId: string): Promise<ActionResult>
   }
 }
 
-
 export async function banUser(targetUserId: string): Promise<ActionResult> {
   try {
     const { id: actorId } = await assertSuperAdmin();
@@ -327,7 +339,6 @@ export async function banUser(targetUserId: string): Promise<ActionResult> {
   }
 }
 
-
 export async function unbanUser(targetUserId: string): Promise<ActionResult> {
   try {
     const { id: actorId } = await assertSuperAdmin();
@@ -355,7 +366,6 @@ export async function unbanUser(targetUserId: string): Promise<ActionResult> {
     return { success: false, message: "Hanya Super Admin yang bisa mem-banned user" };
   }
 }
-
 
 export async function inviteUser(email: string): Promise<ActionResult> {
   try {
@@ -537,7 +547,7 @@ export async function upsertActiveBroadcast(formData: FormData): Promise<ActionR
 }
 
 export async function getUpcomingAgendas(): Promise<
-  { id: string; title: string; type: import("@prisma/client").AgendaType; deadline: Date }[]
+  { id: string; title: string; type: AgendaType; deadline: Date }[]
 > {
   try {
     await assertAdmin();
@@ -551,10 +561,14 @@ export async function getUpcomingAgendas(): Promise<
       select: { id: true, title: true, type: true, deadline: true },
     });
 
-    return rows.map(({ id, title, type, deadline }) => ({ id, title, type, deadline }));
+    return rows.map((row) => {
+      const { type, ...rest } = row;
+      return {
+        ...rest,
+        type: type as unknown as AgendaType,
+      };
+    });
   } catch {
     return [];
   }
 }
-
-

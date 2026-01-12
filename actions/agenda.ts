@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { Role, AgendaType } from "@prisma/client";
+import { Role, AgendaType } from "@/lib/enums";
 import { revalidatePath } from "next/cache";
 
 const AgendaSchema = z.object({
