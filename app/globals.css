@@ -48,6 +48,8 @@
 
     --sidebar-width: 22rem;
     --sidebar-width-icon: 5rem;
+
+    --spotlight-color: #e5e5e5;
   }
 
   .dark {
@@ -92,6 +94,8 @@
 
     --sidebar-width: 18rem;
     --sidebar-width-icon: 4.5rem;
+
+    --spotlight-color: #262626;
   }
 }
 

@@ -60,13 +60,58 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
 
   const scrollLeft = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
+      const container = carouselRef.current;
+      const scrollPosition = container.scrollLeft;
+      const cards = container.querySelectorAll(".snap-start");
+
+      let targetScroll = 0;
+
+      // Find the first card that is strictly to the left of current view
+      // We iterate backwards to find the closest one
+      for (let i = cards.length - 1; i >= 0; i--) {
+        const card = cards[i] as HTMLElement;
+        const cardLeft = card.offsetLeft;
+
+        // Tolerance of 10px to account for slight misalignments
+        if (cardLeft < scrollPosition - 10) {
+          targetScroll = cardLeft;
+          // Subtract padding-left of container (16px / 1rem) or similar offset if needed
+          // For now, snapping usually handles the alignment if we scroll near it
+          break;
+        }
+      }
+
+      container.scrollTo({
+        left: targetScroll,
+        behavior: "smooth",
+      });
     }
   };
 
   const scrollRight = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
+      const container = carouselRef.current;
+      const scrollPosition = container.scrollLeft;
+      const cards = container.querySelectorAll(".snap-start");
+
+      let targetScroll = container.scrollWidth;
+
+      // Find the first card that is strictly to the right of current view
+      for (let i = 0; i < cards.length; i++) {
+        const card = cards[i] as HTMLElement;
+        const cardLeft = card.offsetLeft;
+
+        // Tolerance of 10px
+        if (cardLeft > scrollPosition + 10) {
+          targetScroll = cardLeft;
+          break;
+        }
+      }
+
+      container.scrollTo({
+        left: targetScroll,
+        behavior: "smooth",
+      });
     }
   };
 
@@ -93,7 +138,7 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
     >
       <div className="relative w-full">
         <div
-          className="flex w-full overflow-x-scroll overscroll-x-auto scroll-smooth py-10 [scrollbar-width:none] md:py-20"
+          className="flex w-full overflow-x-scroll overscroll-x-auto scroll-smooth py-10 [scrollbar-width:none] md:py-20 snap-x snap-mandatory"
           ref={carouselRef}
           onScroll={checkScrollability}
         >
@@ -105,7 +150,7 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
 
           <div
             className={cn(
-              "flex flex-row justify-start gap-4 pl-4",
+              "flex flex-row justify-start gap-4 pl-8 md:pl-4",
               "mx-auto max-w-7xl"
             )}
           >
@@ -125,7 +170,7 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
                   },
                 }}
                 key={"card" + index}
-                className="rounded-3xl last:pr-[5%] md:last:pr-[33%]"
+                className="rounded-3xl last:pr-[5%] md:last:pr-[33%] flex-shrink-0 snap-start"
               >
                 {item}
               </motion.div>
@@ -241,7 +286,7 @@ export const Card = ({
       <motion.button
         layoutId={layout ? `card-${card.title}` : undefined}
         onClick={handleOpen}
-        className="relative z-10 flex h-80 w-56 flex-col items-start justify-start overflow-hidden rounded-3xl bg-gray-100 md:h-[40rem] md:w-96 dark:bg-neutral-900"
+        className="relative z-10 flex h-80 w-56 flex-col items-start justify-start overflow-hidden rounded-3xl bg-neutral-100 md:h-[40rem] md:w-96 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800"
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-full bg-gradient-to-b from-black/50 via-transparent to-transparent" />
         <div className="relative z-40 p-8">

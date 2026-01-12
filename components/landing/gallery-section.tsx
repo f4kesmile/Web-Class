@@ -63,12 +63,11 @@ export function GallerySection({ galleries }: GallerySectionProps) {
                 </div>
 
                 {validUrl && (
-                  <div className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden mt-6 shadow-md">
-                    <Image
+                  <div className="mt-6 rounded-xl overflow-hidden shadow-md bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
+                    <img
                       src={validUrl}
                       alt={item.title || "Galeri"}
-                      fill
-                      className="object-cover"
+                      className="w-full h-auto object-contain"
                     />
                   </div>
                 )}
@@ -83,7 +82,7 @@ export function GallerySection({ galleries }: GallerySectionProps) {
 
   return (
     <div className="w-full h-full py-24 bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-300">
-      <h2 className="max-w-7xl pl-4 mx-auto text-xl md:text-5xl font-bold text-neutral-900 dark:text-neutral-200 font-sans mb-8">
+      <h2 className="max-w-7xl pl-8 md:pl-4 mx-auto text-xl md:text-5xl font-bold text-neutral-900 dark:text-neutral-200 font-sans mb-8">
         Galeri Kegiatan Kelas
       </h2>
       <Carousel items={cards} />

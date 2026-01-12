@@ -19,7 +19,7 @@ export function HeroSection() {
 
   return (
     <div
-      className="h-[300vh] bg-white dark:bg-black w-full relative pt-40 overflow-clip transition-colors duration-300"
+      className="h-[250vh] md:h-[300vh] bg-white dark:bg-black w-full relative pt-0 md:pt-40 overflow-clip transition-colors duration-300"
       ref={ref}
     >
       <GoogleGeminiEffect

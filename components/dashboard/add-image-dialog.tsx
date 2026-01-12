@@ -30,6 +30,7 @@ export function AddImageDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -129,19 +130,55 @@ export function AddImageDialog() {
                 </div>
               </label>
             ) : (
-              <div className="relative w-full h-48 rounded-xl overflow-hidden border border-border group">
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  className="absolute top-2 right-2 p-1 bg-background/60 backdrop-blur text-foreground rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              <div className="space-y-4">
+                <div className="relative w-full h-48 rounded-xl overflow-hidden border border-border group hidden">
+                  {/* Hidden raw preview, we show the card style instead */}
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-2 right-2 p-1 bg-background/60 backdrop-blur text-foreground rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="flex flex-col items-center gap-2 border rounded-xl p-4 bg-muted/10">
+                  <Label className="text-xs font-semibold uppercase text-muted-foreground self-start mb-2">
+                    Preview Tampilan (Mobile)
+                  </Label>
+                  <div className="relative z-10 flex h-80 w-56 flex-col items-start justify-start overflow-hidden rounded-3xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-full bg-gradient-to-b from-black/50 via-transparent to-transparent" />
+                    <div className="relative z-40 p-8">
+                      <p className="text-left font-sans text-sm font-medium text-white">
+                        Galeri
+                      </p>
+                      <p className="mt-2 max-w-xs text-left font-sans text-xl font-semibold [text-wrap:balance] text-white">
+                        {title || "Judul Kegiatan"}
+                      </p>
+                    </div>
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="absolute inset-0 z-10 h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-2 right-2 z-50 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center mt-2 max-w-[250px]">
+                    Ini adalah simulasi bagaimana foto akan terlihat di halaman
+                    depan (terpotong sesuai rasio kartu).
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -155,6 +192,7 @@ export function AddImageDialog() {
               placeholder="Contoh: Kunjungan Industri"
               className="bg-muted/30"
               required
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 

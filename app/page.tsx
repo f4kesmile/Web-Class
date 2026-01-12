@@ -12,7 +12,10 @@ export default async function LandingPage() {
   const [agendas, schedules, officers, galleries] = await getLandingPageData();
 
   return (
-    <main className="bg-white dark:bg-black min-h-screen selection:bg-blue-500/30 transition-colors duration-300">
+    <main
+      suppressHydrationWarning
+      className="bg-white dark:bg-black min-h-screen selection:bg-blue-500/30 transition-colors duration-300"
+    >
       <Navbar user={user} />
 
       <HeroSection />
