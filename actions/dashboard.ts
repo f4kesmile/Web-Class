@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { DayOfWeek } from "@/lib/enums";
 
 export async function getDashboardData() {
@@ -23,7 +24,9 @@ export async function getDashboardData() {
   const todayEnum = days[new Date().getDay()];
 
   const todaySchedule = await prisma.schedule.findMany({
-    where: { day: todayEnum as unknown as import("@prisma/client").DayOfWeek },
+    where: { 
+      day: todayEnum as unknown as Prisma.ScheduleWhereInput["day"] 
+    },
     orderBy: { startTime: "asc" },
   });
 
