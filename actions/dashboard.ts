@@ -1,15 +1,21 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
-import { DayOfWeek } from "@/lib/enums";
+import { DayOfWeek, AgendaType } from "@/lib/enums";
+
+type PrismaDayOfWeek = "SUNDAY" | "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY";
 
 export async function getDashboardData() {
-  const upcomingAgendas = await prisma.agenda.findMany({
+  const upcomingAgendasData = await prisma.agenda.findMany({
     where: { deadline: { gte: new Date() } },
     orderBy: { deadline: "asc" },
     take: 5,
   });
+
+  const upcomingAgendas = upcomingAgendasData.map((agenda) => ({
+    ...agenda,
+    type: agenda.type as unknown as AgendaType,
+  }));
 
   const days = [
     DayOfWeek.SUNDAY,
@@ -23,12 +29,17 @@ export async function getDashboardData() {
 
   const todayEnum = days[new Date().getDay()];
 
-  const todaySchedule = await prisma.schedule.findMany({
-    where: { 
-      day: todayEnum as unknown as Prisma.ScheduleWhereInput["day"] 
+  const todayScheduleData = await prisma.schedule.findMany({
+    where: {
+      day: todayEnum as unknown as PrismaDayOfWeek,
     },
     orderBy: { startTime: "asc" },
   });
+
+  const todaySchedule = todayScheduleData.map((schedule) => ({
+    ...schedule,
+    day: schedule.day as unknown as DayOfWeek,
+  }));
 
   return { upcomingAgendas, todaySchedule, todayEnum };
 }
