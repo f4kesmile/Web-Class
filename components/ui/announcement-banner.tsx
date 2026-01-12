@@ -4,12 +4,9 @@ import { AnnouncementToast } from "@/components/ui/announcement-toast";
 export async function AnnouncementBanner() {
   const broadcast = await getActiveBroadcast();
 
-  if (!broadcast?.data) return null;
+  if (!broadcast) return null;
 
   return (
-    <AnnouncementToast
-      title={broadcast.data.title}
-      content={broadcast.data.content}
-    />
+    <AnnouncementToast title={broadcast.title} content={broadcast.content} />
   );
 }
