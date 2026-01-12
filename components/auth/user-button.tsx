@@ -37,6 +37,8 @@ export function UserButton({ user }: UserButtonProps) {
 
   if (!user) return null;
 
+  const isAdminOrSuper = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
+
   return (
     <>
       <ProfileDialog
@@ -80,6 +82,21 @@ export function UserButton({ user }: UserButtonProps) {
             <span>Profil Saya</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
+
+          {isAdminOrSuper && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/dashboard"
+                  className="cursor-pointer w-full flex items-center"
+                >
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
 
           <DropdownMenuItem
             className="text-red-500 cursor-pointer focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/50"
