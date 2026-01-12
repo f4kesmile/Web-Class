@@ -22,7 +22,8 @@ import {
 } from "lucide-react";
 import { GoogleIcon } from "@/components/icons/google-icon";
 import { AuthLayout } from "@/components/auth/auth-layout";
-import { User, Role } from "@prisma/client";
+import { Role } from "@/lib/enums";
+import type { User } from "@prisma/client";
 
 export default function SignInPage() {
   const router = useRouter();

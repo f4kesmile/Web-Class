@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Role } from "@prisma/client";
+import { Role } from "@/lib/enums";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
