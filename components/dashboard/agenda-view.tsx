@@ -83,7 +83,7 @@ export function AgendaView({ initialData, isAdmin }: AgendaViewProps) {
             className={cn(
               "px-4 py-2 rounded-full text-sm font-medium transition-all border",
               filter === tab.id
-                ? "bg-primary border-zinc-600 text-white shadow-md shadow-zinc-500/20"
+                ? "bg-primary text-primary-foreground border-primary shadow-md shadow-zinc-500/20"
                 : "bg-background border-border text-muted-foreground hover:border-zinc-600/50 hover:text-foreground"
             )}
           >
