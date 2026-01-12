@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Settings } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { Role } from "@prisma/client";
+import { Role } from "@/lib/enums";
 import {
   getSiteSettings,
   getAllUsers,
@@ -44,6 +44,8 @@ export default async function SettingsPage() {
       getUpcomingAgendas(),
     ]);
 
+  const currentUserRole = role as unknown as Role;
+
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-6xl mx-auto">
       <div>
@@ -60,7 +62,7 @@ export default async function SettingsPage() {
         settings={settings}
         users={users}
         logs={logs}
-        currentUserRole={role}
+        currentUserRole={currentUserRole}
         activeBroadcast={activeBroadcast}
         upcomingAgendas={upcomingAgendas}
         currentUserId={currentUserId}
