@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { GraduationCap, LayoutDashboard, LogIn, UserPlus } from "lucide-react";
 import { UserButton } from "@/components/auth/user-button";
 import type { AuthUser } from "@/lib/auth";
-import { Role } from "@prisma/client";
+import { Role } from "@/lib/enums";
 import { AnimatedThemeToggler } from "@/components/ui/themeToggler";
 
 interface NavbarProps {
