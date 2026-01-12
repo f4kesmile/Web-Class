@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { updateSchedule } from "@/actions/schedule";
+import { cn } from "@/lib/utils";
 
 interface EditScheduleDialogProps {
   data: Schedule;
@@ -45,24 +46,33 @@ export function EditScheduleDialog({ data }: EditScheduleDialogProps) {
       toast.success(result.message);
       setOpen(false);
       router.refresh();
-    } else {
-      toast.error(result.message);
+      return;
     }
+
+    toast.error(result.message);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="p-2 text-muted-foreground/50 hover:text-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 rounded-md transition-all">
+        <button
+          className={cn(
+            "p-2 rounded-md transition",
+            "text-muted-foreground/60 hover:text-foreground",
+            "hover:bg-muted/50"
+          )}
+        >
           <Pencil className="w-4 h-4" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+
+      <DialogContent className="sm:max-w-[500px] bg-background/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Pencil className="w-5 h-5 text-blue-500" /> Edit Jadwal
+            <Pencil className="w-5 h-5 text-primary" /> Edit Jadwal
           </DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-3 space-y-2">
@@ -97,6 +107,7 @@ export function EditScheduleDialog({ data }: EditScheduleDialogProps) {
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-2">
               <Label>Ruangan</Label>
               <Input name="room" defaultValue={data.room || ""} />
@@ -112,7 +123,7 @@ export function EditScheduleDialog({ data }: EditScheduleDialogProps) {
                 defaultValue={data.startTime}
                 required
               />
-              <span>-</span>
+              <span className="text-muted-foreground">-</span>
               <Input
                 type="time"
                 name="endTime"
@@ -128,12 +139,16 @@ export function EditScheduleDialog({ data }: EditScheduleDialogProps) {
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Save className="w-4 h-4 mr-2" />
-              )}{" "}
+              )}
               Simpan
             </Button>
           </DialogFooter>
@@ -142,3 +157,5 @@ export function EditScheduleDialog({ data }: EditScheduleDialogProps) {
     </Dialog>
   );
 }
+
+export default EditScheduleDialog;

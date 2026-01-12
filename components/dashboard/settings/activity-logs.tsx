@@ -1,64 +1,71 @@
 "use client";
 
-import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogRow } from "@/components/dashboard/settings/settings-tabs";
+import type { LogRow } from "@/components/dashboard/settings/settings-tabs";
+import { cn } from "@/lib/utils";
 
 type ActivityLogsProps = {
   logs: LogRow[];
+  embedded?: boolean;
 };
 
 function formatUserName(name: string | null) {
   return name?.trim() ? name : "Unknown";
 }
 
-export function ActivityLogs({ logs }: ActivityLogsProps) {
-  return (
-    <Card className="w-full rounded-2xl border bg-background/70 backdrop-blur p-5">
-      <div className="flex items-center gap-2">
-        <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
-          <div className="h-2 w-2 rounded-full bg-primary" />
-        </div>
-        <div>
-          <div className="text-base font-semibold">Log Aktivitas</div>
-          <div className="text-sm text-muted-foreground">
-            Rekam jejak tindakan sensitif sistem.
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 space-y-3">
-        {logs.map(({ id, action, details, createdAt, user }) => (
-          <Card
-            key={id}
-            className="rounded-xl border bg-background p-4 flex items-start justify-between gap-3"
-          >
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="secondary">{action}</Badge>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(createdAt).toLocaleString()}
-                </span>
-              </div>
-
-              <div className="mt-2 text-sm text-foreground break-words">
-                {details?.trim() ? details : "-"}
-              </div>
-
-              <div className="mt-2 text-xs text-muted-foreground">
-                {formatUserName(user.name)} • {user.email}
-              </div>
-            </div>
-          </Card>
-        ))}
-
-        {logs.length === 0 && (
-          <div className="text-sm text-muted-foreground mt-4">
-            Belum ada aktivitas.
-          </div>
+export function ActivityLogs({ logs, embedded = false }: ActivityLogsProps) {
+  if (logs.length === 0) {
+    return (
+      <Card
+        className={cn(
+          "w-full border bg-background/40 backdrop-blur-xl shadow-sm p-6 text-center",
+          embedded ? "rounded-3xl" : "rounded-2xl"
         )}
-      </div>
-    </Card>
+      >
+        <p className="text-sm text-muted-foreground">Belum ada aktivitas.</p>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="w-full space-y-3">
+      {logs.map(({ id, action, details, createdAt, user }) => (
+        <Card
+          key={id}
+          className={cn(
+            "w-full border bg-background/40 backdrop-blur-xl shadow-sm p-4 sm:p-5 transition-all hover:bg-background/60",
+            embedded ? "rounded-3xl" : "rounded-2xl"
+          )}
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <Badge
+                className="rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0"
+                variant="secondary"
+              >
+                {action}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {new Date(createdAt).toLocaleString("id-ID", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+            <div className="text-xs text-muted-foreground font-medium">
+              {formatUserName(user.name)}
+            </div>
+          </div>
+
+          <div className="mt-2 text-sm text-foreground break-words leading-relaxed">
+            {details?.trim() ? details : "-"}
+          </div>
+        </Card>
+      ))}
+    </div>
   );
 }

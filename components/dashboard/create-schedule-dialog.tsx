@@ -44,24 +44,25 @@ export function CreateScheduleDialog() {
       toast.success(result.message);
       setOpen(false);
       router.refresh();
-    } else {
-      toast.error(result.message);
+      return;
     }
+
+    toast.error(result.message);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-lg shadow-blue-500/20 transition-all active:scale-95">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-lg shadow-primary/10 transition-all active:scale-95">
           <Plus className="w-4 h-4" />
           <span className="hidden sm:inline">Tambah Jadwal</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[500px] border-none shadow-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md">
+      <DialogContent className="sm:max-w-[500px] bg-background/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-blue-500" />
+            <BookOpen className="w-5 h-5 text-primary" />
             Tambah Mata Kuliah
           </DialogTitle>
           <DialogDescription>
@@ -70,7 +71,6 @@ export function CreateScheduleDialog() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Baris 1: Matkul & SKS */}
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-3 space-y-2">
               <Label
@@ -104,7 +104,6 @@ export function CreateScheduleDialog() {
             </div>
           </div>
 
-          {/* Baris 2: Hari & Ruangan */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase text-muted-foreground">
@@ -137,7 +136,6 @@ export function CreateScheduleDialog() {
             </div>
           </div>
 
-          {/* Baris 3: Waktu */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <Clock className="w-3 h-3" /> Waktu Mulai & Selesai
@@ -159,7 +157,6 @@ export function CreateScheduleDialog() {
             </div>
           </div>
 
-          {/* Baris 4: Dosen */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <User className="w-3 h-3" /> Dosen Pengampu
@@ -182,7 +179,7 @@ export function CreateScheduleDialog() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -197,3 +194,5 @@ export function CreateScheduleDialog() {
     </Dialog>
   );
 }
+
+export default CreateScheduleDialog;

@@ -54,7 +54,7 @@ export function ScheduleView({ initialData, isAdmin }: ScheduleViewProps) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Calendar className="w-8 h-8 text-blue-600" />
+            <Calendar className="w-8 h-8 text-primary" />
             Jadwal Kuliah
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -71,14 +71,14 @@ export function ScheduleView({ initialData, isAdmin }: ScheduleViewProps) {
             className={cn(
               "relative px-4 py-2 rounded-lg text-sm font-medium transition-colors outline-none",
               activeDay === day.id
-                ? "text-blue-600 dark:text-blue-400"
-                : "text-muted-foreground hover:text-blue-600/80"
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             {activeDay === day.id && (
               <motion.div
                 layoutId="active-pill"
-                className="absolute inset-0 bg-white dark:bg-zinc-900 shadow-sm rounded-lg border border-blue-100 dark:border-blue-900"
+                className="absolute inset-0 bg-background/70 shadow-sm rounded-lg border border-border"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
             )}
@@ -133,15 +133,19 @@ function ScheduleCard({ data, index, isAdmin, onDelete }: ScheduleCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, delay: index * 0.1 }}
-      className="group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-blue-500/30 flex flex-col justify-between h-full"
+      className={cn(
+        "group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition-all",
+        "hover:shadow-md hover:border-primary/20 flex flex-col justify-between h-full"
+      )}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 dark:from-blue-950/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-muted/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
       <div className="relative z-10 space-y-4 mb-4">
         <div className="flex justify-between items-start gap-4">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg shrink-0">
-            <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="bg-muted/50 p-2 rounded-lg shrink-0">
+            <BookOpen className="w-5 h-5 text-muted-foreground" />
           </div>
+
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-xs font-mono font-medium shrink-0">
             <Clock className="w-3.5 h-3.5" />
             {data.startTime} - {data.endTime}
@@ -149,7 +153,7 @@ function ScheduleCard({ data, index, isAdmin, onDelete }: ScheduleCardProps) {
         </div>
 
         <div>
-          <h3 className="font-bold text-lg leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
             {data.subject}
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
@@ -177,10 +181,11 @@ function ScheduleCard({ data, index, isAdmin, onDelete }: ScheduleCardProps) {
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50/50 rounded-md transition-colors">
+              <button className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors">
                 <Trash2 className="w-4 h-4" />
               </button>
             </AlertDialogTrigger>
+
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Hapus Jadwal?</AlertDialogTitle>
@@ -193,7 +198,7 @@ function ScheduleCard({ data, index, isAdmin, onDelete }: ScheduleCardProps) {
                 <AlertDialogCancel>Batal</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={onDelete}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   Hapus
                 </AlertDialogAction>

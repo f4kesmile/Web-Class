@@ -75,6 +75,42 @@ type ActiveBroadcast = {
   author: { name: string | null };
 } | null;
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+function immutableSuperAdminEmailSet() {
+  const raw = process.env.SUPERADMIN_IMMUTABLE_EMAILS ?? "";
+  const list = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map(normalizeEmail);
+
+  return new Set(list);
+}
+
+async function getTargetUserCore(targetUserId: string) {
+  const target = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { id: true, email: true, role: true, isBanned: true },
+  });
+
+  if (!target) throw new Error("USER_NOT_FOUND");
+  return target;
+}
+
+function isImmutableSuperAdmin(target: { email: string; role: Role }) {
+  if (target.role !== Role.SUPER_ADMIN) return false;
+  const set = immutableSuperAdminEmailSet();
+  return set.has(normalizeEmail(target.email));
+}
+
+function assertNotSelf(actorId: string, targetUserId: string) {
+  if (actorId === targetUserId) throw new Error("CANNOT_TOUCH_SELF");
+}
+
+
 async function assertAdmin(): Promise<{ id: string; role: Role; isBanned: boolean; email: string }> {
   const user = await getCurrentUser();
   if (!user) throw new Error("UNAUTHORIZED");
@@ -94,9 +130,28 @@ async function assertSuperAdmin(): Promise<{ id: string; role: Role; isBanned: b
 }
 
 async function createLog(userId: string, action: string, details: string) {
+  // 1. Create the new log
   await prisma.activityLog.create({
     data: { userId, action, details },
   });
+
+  // 2. Auto-prune: Keep only the latest 50 logs
+  const count = await prisma.activityLog.count();
+  if (count > 50) {
+    const logsToKeep = await prisma.activityLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: { id: true },
+    });
+
+    const idsToKeep = logsToKeep.map((log) => log.id);
+
+    await prisma.activityLog.deleteMany({
+      where: {
+        id: { notIn: idsToKeep },
+      },
+    });
+  }
 }
 
 export async function updateSiteSettings(formData: FormData): Promise<ActionResult> {
@@ -184,84 +239,123 @@ export async function getAllUsers(): Promise<SafeUserRow[]> {
 
 export async function updateUserRole(targetUserId: string, newRole: Role): Promise<ActionResult> {
   try {
-    const { id: userId } = await assertSuperAdmin();
+    const { id: actorId } = await assertSuperAdmin();
+
+    assertNotSelf(actorId, targetUserId);
+
+    const target = await getTargetUserCore(targetUserId);
+    if (isImmutableSuperAdmin(target)) {
+      return { success: false, message: "Target adalah Super Admin yang tidak bisa disentuh." };
+    }
 
     await prisma.user.update({
       where: { id: targetUserId },
       data: { role: newRole },
     });
 
-    await createLog(userId, "UPDATE_ROLE", `Mengubah role user ${targetUserId} menjadi ${newRole}`);
+    await createLog(actorId, "UPDATE_ROLE", `Mengubah role user ${targetUserId} menjadi ${newRole}`);
     revalidatePath("/dashboard/settings");
     return { success: true, message: "Role user diperbarui" };
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+
+    if (msg === "CANNOT_TOUCH_SELF") return { success: false, message: "Tidak bisa mengubah role diri sendiri." };
+    if (msg === "USER_NOT_FOUND") return { success: false, message: "User tidak ditemukan" };
+
     return { success: false, message: "Hanya Super Admin yang bisa mengubah Role" };
   }
 }
 
+
 export async function toggleBanUser(targetUserId: string): Promise<ActionResult> {
   try {
-    const { id: userId } = await assertSuperAdmin();
+    const { id: actorId } = await assertSuperAdmin();
 
-    const target = await prisma.user.findUnique({ where: { id: targetUserId } });
-    if (!target) return { success: false, message: "User tidak ditemukan" };
+    assertNotSelf(actorId, targetUserId);
 
-    const { isBanned, email } = target;
+    const target = await getTargetUserCore(targetUserId);
+    if (isImmutableSuperAdmin(target)) {
+      return { success: false, message: "Target adalah Super Admin yang tidak bisa disentuh." };
+    }
 
     await prisma.user.update({
       where: { id: targetUserId },
-      data: { isBanned: !isBanned },
+      data: { isBanned: !target.isBanned },
     });
 
-    const action = isBanned ? "UNBAN_USER" : "BAN_USER";
-    await createLog(userId, action, `${action} user ${email}`);
+    const action = target.isBanned ? "UNBAN_USER" : "BAN_USER";
+    await createLog(actorId, action, `${action} user ${target.email}`);
 
     revalidatePath("/dashboard/settings");
-    return { success: true, message: isBanned ? "User diaktifkan kembali" : "User telah dibanned" };
-  } catch {
+    return { success: true, message: target.isBanned ? "User diaktifkan kembali" : "User telah dibanned" };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+
+    if (msg === "CANNOT_TOUCH_SELF") return { success: false, message: "Tidak bisa mem-banned diri sendiri." };
+    if (msg === "USER_NOT_FOUND") return { success: false, message: "User tidak ditemukan" };
+
     return { success: false, message: "Hanya Super Admin yang bisa mem-banned user" };
   }
 }
+
 
 export async function banUser(targetUserId: string): Promise<ActionResult> {
   try {
-    const { id: userId } = await assertSuperAdmin();
+    const { id: actorId } = await assertSuperAdmin();
 
-    const target = await prisma.user.findUnique({ where: { id: targetUserId } });
-    if (!target) return { success: false, message: "User tidak ditemukan" };
+    assertNotSelf(actorId, targetUserId);
 
-    const { isBanned, email } = target;
-    if (isBanned) return { success: true, message: "User sudah dalam status banned" };
+    const target = await getTargetUserCore(targetUserId);
+    if (isImmutableSuperAdmin(target)) {
+      return { success: false, message: "Target adalah Super Admin yang tidak bisa disentuh." };
+    }
+
+    if (target.isBanned) return { success: true, message: "User sudah dalam status banned" };
 
     await prisma.user.update({ where: { id: targetUserId }, data: { isBanned: true } });
-    await createLog(userId, "BAN_USER", `BAN_USER user ${email}`);
+    await createLog(actorId, "BAN_USER", `BAN_USER user ${target.email}`);
 
     revalidatePath("/dashboard/settings");
     return { success: true, message: "User telah dibanned" };
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+
+    if (msg === "CANNOT_TOUCH_SELF") return { success: false, message: "Tidak bisa membanned diri sendiri." };
+    if (msg === "USER_NOT_FOUND") return { success: false, message: "User tidak ditemukan" };
+
     return { success: false, message: "Hanya Super Admin yang bisa mem-banned user" };
   }
 }
+
 
 export async function unbanUser(targetUserId: string): Promise<ActionResult> {
   try {
-    const { id: userId } = await assertSuperAdmin();
+    const { id: actorId } = await assertSuperAdmin();
 
-    const target = await prisma.user.findUnique({ where: { id: targetUserId } });
-    if (!target) return { success: false, message: "User tidak ditemukan" };
+    assertNotSelf(actorId, targetUserId);
 
-    const { isBanned, email } = target;
-    if (!isBanned) return { success: true, message: "User sudah aktif" };
+    const target = await getTargetUserCore(targetUserId);
+    if (isImmutableSuperAdmin(target)) {
+      return { success: false, message: "Target adalah Super Admin yang tidak bisa disentuh." };
+    }
+
+    if (!target.isBanned) return { success: true, message: "User sudah aktif" };
 
     await prisma.user.update({ where: { id: targetUserId }, data: { isBanned: false } });
-    await createLog(userId, "UNBAN_USER", `UNBAN_USER user ${email}`);
+    await createLog(actorId, "UNBAN_USER", `UNBAN_USER user ${target.email}`);
 
     revalidatePath("/dashboard/settings");
     return { success: true, message: "User diaktifkan kembali" };
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+
+    if (msg === "CANNOT_TOUCH_SELF") return { success: false, message: "Tidak bisa unban diri sendiri." };
+    if (msg === "USER_NOT_FOUND") return { success: false, message: "User tidak ditemukan" };
+
     return { success: false, message: "Hanya Super Admin yang bisa mem-banned user" };
   }
 }
+
 
 export async function inviteUser(email: string): Promise<ActionResult> {
   try {
@@ -390,3 +484,77 @@ export async function getActiveBroadcast(): Promise<ActiveBroadcast> {
   const { id, title, content, createdAt, author } = announcement;
   return { id, title, content, createdAt, author };
 }
+
+export async function upsertActiveBroadcast(formData: FormData): Promise<ActionResult> {
+  try {
+    const { id: userId } = await assertAdmin();
+
+    const title = String(formData.get("title") ?? "").trim();
+    const content = String(formData.get("content") ?? "").trim();
+
+    if (!title || !content) return { success: false, message: "Judul dan isi pesan wajib diisi" };
+
+    await prisma.$transaction(async (tx) => {
+      const active = await tx.announcement.findFirst({
+        where: { isActive: true },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, title: true },
+      });
+
+      if (active) {
+        await tx.announcement.updateMany({
+          where: { isActive: true, id: { not: active.id } },
+          data: { isActive: false },
+        });
+
+        await tx.announcement.update({
+          where: { id: active.id },
+          data: { title, content, isActive: true },
+        });
+
+        await createLog(userId, "UPDATE_BROADCAST", `Update broadcast: ${active.title} -> ${title}`);
+        return;
+      }
+
+      await tx.announcement.updateMany({
+        where: { isActive: true },
+        data: { isActive: false },
+      });
+
+      await tx.announcement.create({
+        data: { title, content, isActive: true, authorId: userId },
+      });
+
+      await createLog(userId, "CREATE_BROADCAST", `Membuat pengumuman: ${title}`);
+    });
+
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/");
+    return { success: true, message: "Broadcast berhasil diaktifkan." };
+  } catch {
+    return { success: false, message: "Akses ditolak" };
+  }
+}
+
+export async function getUpcomingAgendas(): Promise<
+  { id: string; title: string; type: import("@prisma/client").AgendaType; deadline: Date }[]
+> {
+  try {
+    await assertAdmin();
+
+    const now = new Date();
+
+    const rows = await prisma.agenda.findMany({
+      where: { deadline: { gte: now } },
+      orderBy: { deadline: "asc" },
+      take: 10,
+      select: { id: true, title: true, type: true, deadline: true },
+    });
+
+    return rows.map(({ id, title, type, deadline }) => ({ id, title, type, deadline }));
+  } catch {
+    return [];
+  }
+}
+
+

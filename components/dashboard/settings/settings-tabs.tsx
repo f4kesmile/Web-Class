@@ -1,22 +1,16 @@
 "use client";
 
-import React, {
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { AgendaType, Role } from "@prisma/client";
 import { cn } from "@/lib/utils";
-import { Role } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SiteSettingsForm } from "@/components/dashboard/settings/site-settings-form";
-import { UserManagementClient } from "@/components/dashboard/settings/user-management-client";
-import { ActivityLogs } from "@/components/dashboard/settings/activity-logs";
+import UserManagementClient from "@/components/dashboard/settings/user-management-client";
 import { BroadcastForm } from "@/components/dashboard/settings/broadcast-form";
+import { ActivityLogs } from "@/components/dashboard/settings/activity-logs";
 import { ApiDocs } from "@/components/dashboard/settings/api-docs";
-import { Globe, Users, Activity, Megaphone, Braces } from "lucide-react";
+import { Activity, Braces, Globe, Megaphone, Users } from "lucide-react";
 
 export type SiteSettingsRow = {
   id: string;
@@ -57,28 +51,34 @@ export type ActiveBroadcastRow = {
   title: string;
   content: string;
   createdAt: Date;
-  author: {
-    name: string | null;
-  };
+  author: { name: string | null };
 } | null;
+
+export type UpcomingAgendaRow = {
+  id: string;
+  title: string;
+  type: AgendaType;
+  deadline: Date;
+};
 
 type TabKey = "general" | "users" | "logs" | "broadcast" | "api";
 
 export type SettingsTabsProps = {
+  currentUserId: string;
+  immutableSuperAdminEmails: string[];
   settings: SiteSettingsRow | null;
   users: SafeUserRow[];
   logs: LogRow[];
   currentUserRole: Role;
   activeBroadcast: ActiveBroadcastRow;
+  upcomingAgendas: UpcomingAgendaRow[];
 };
 
 type TabItem = {
   key: TabKey;
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 };
-
-const tabOrder: TabKey[] = ["general", "users", "logs", "broadcast", "api"];
 
 export default function SettingsTabs({
   settings,
@@ -86,17 +86,11 @@ export default function SettingsTabs({
   logs,
   currentUserRole,
   activeBroadcast,
+  upcomingAgendas,
+  currentUserId,
+  immutableSuperAdminEmails,
 }: SettingsTabsProps) {
   const [tab, setTab] = useState<TabKey>("general");
-  const [stableHeight, setStableHeight] = useState<number | null>(null);
-
-  const refs = useRef<Record<TabKey, HTMLDivElement | null>>({
-    general: null,
-    users: null,
-    logs: null,
-    broadcast: null,
-    api: null,
-  });
 
   const tabs = useMemo<TabItem[]>(
     () => [
@@ -113,132 +107,74 @@ export default function SettingsTabs({
     []
   );
 
-  const measureMaxHeight = useCallback(() => {
-    const heights = tabOrder
-      .map((key) => refs.current[key])
-      .filter((el): el is HTMLDivElement => Boolean(el))
-      .map((el) => el.getBoundingClientRect().height);
-
-    const maxHeight = heights.length ? Math.ceil(Math.max(...heights)) : null;
-    setStableHeight(maxHeight);
-  }, []);
-
-  useLayoutEffect(() => {
-    measureMaxHeight();
-  }, [measureMaxHeight, tab, settings, users, logs, activeBroadcast]);
-
-  useLayoutEffect(() => {
-    const onResize = () => measureMaxHeight();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [measureMaxHeight]);
-
-  const containerClassName = "w-full max-w-[560px] mx-auto";
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
   return (
-    <div className={cn("w-full", containerClassName)}>
-      <Card className="w-full rounded-2xl border bg-background/70 backdrop-blur">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-2">
-          {tabs.map(({ key, label, icon }) => {
-            const active = key === tab;
+    <div className="w-full space-y-4">
+      <Card className="w-full rounded-3xl border bg-background/40 backdrop-blur-xl shadow-sm">
+        <div className="p-2">
+          <div className="grid grid-cols-2 gap-2 lg:flex lg:flex-nowrap lg:gap-2">
+            {tabs.map(({ key, label, icon }) => {
+              const active = key === tab;
 
-            return (
-              <Button
-                key={key}
-                type="button"
-                variant="ghost"
-                onClick={() => setTab(key)}
-                className={cn(
-                  "h-11 rounded-xl justify-start gap-2",
-                  active
-                    ? "bg-background shadow-sm"
-                    : "opacity-70 hover:opacity-100"
-                )}
-              >
-                {icon}
-                <span className="text-sm font-medium">{label}</span>
-              </Button>
-            );
-          })}
+              return (
+                <Button
+                  key={key}
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setTab(key)}
+                  className={cn(
+                    "h-11 rounded-2xl justify-start gap-2 px-4 w-full transition",
+                    active
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "bg-background/40 hover:bg-background/70",
+                    "backdrop-blur-md border border-border/60"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "shrink-0",
+                      active
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {icon}
+                  </span>
+                  <span className="text-sm font-medium">{label}</span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
       </Card>
 
-      <div
-        className="mt-4 relative w-full"
-        style={stableHeight ? { height: stableHeight } : undefined}
-      >
-        <div
-          className={cn(
-            "absolute inset-0 transition-opacity duration-200",
-            tab === "general"
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          )}
-          ref={(el) => {
-            refs.current.general = el;
-          }}
-        >
-          <SiteSettingsForm initialData={settings} />
+      <div className="w-full min-h-[calc(100vh-200px)]">
+        <div className={tab === "general" ? "block" : "hidden"}>
+          <SiteSettingsForm initialData={settings} embedded />
         </div>
 
-        <div
-          className={cn(
-            "absolute inset-0 transition-opacity duration-200",
-            tab === "users"
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          )}
-          ref={(el) => {
-            refs.current.users = el;
-          }}
-        >
+        <div className={tab === "users" ? "block" : "hidden"}>
           <UserManagementClient
             users={users}
             currentUserRole={currentUserRole}
+            currentUserId={currentUserId}
+            upcomingAgendas={upcomingAgendas}
+            immutableSuperAdminEmails={immutableSuperAdminEmails}
+            embedded
           />
         </div>
 
-        <div
-          className={cn(
-            "absolute inset-0 transition-opacity duration-200",
-            tab === "logs"
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          )}
-          ref={(el) => {
-            refs.current.logs = el;
-          }}
-        >
-          <ActivityLogs logs={logs} />
+        <div className={tab === "logs" ? "block" : "hidden"}>
+          <ActivityLogs logs={logs} embedded />
         </div>
 
-        <div
-          className={cn(
-            "absolute inset-0 transition-opacity duration-200",
-            tab === "broadcast"
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          )}
-          ref={(el) => {
-            refs.current.broadcast = el;
-          }}
-        >
-          <BroadcastForm currentBroadcast={activeBroadcast} />
+        <div className={tab === "broadcast" ? "block" : "hidden"}>
+          <BroadcastForm currentBroadcast={activeBroadcast} embedded />
         </div>
 
-        <div
-          className={cn(
-            "absolute inset-0 transition-opacity duration-200",
-            tab === "api"
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          )}
-          ref={(el) => {
-            refs.current.api = el;
-          }}
-        >
-          <ApiDocs baseUrl={baseUrl} />
+        <div className={tab === "api" ? "block" : "hidden"}>
+          <ApiDocs baseUrl={baseUrl} embedded />
         </div>
       </div>
     </div>

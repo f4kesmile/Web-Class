@@ -2,23 +2,28 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pencil, Type, AlignLeft, Calendar } from "lucide-react";
+import { Loader2, Pencil, Calendar, Type, AlignLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Gallery } from "@prisma/client";
+import { updateGallery } from "@/actions/gallery";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { updateGallery } from "@/actions/gallery";
+import { Textarea } from "@/components/ui/textarea";
 
-export function EditGalleryDialog({ data }: { data: Gallery }) {
+interface EditGalleryDialogProps {
+  data: Gallery;
+}
+
+export function EditGalleryDialog({ data }: EditGalleryDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -26,70 +31,94 @@ export function EditGalleryDialog({ data }: { data: Gallery }) {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
+
     const formData = new FormData(event.currentTarget);
     const result = await updateGallery(data.id, null, formData);
+
     setIsLoading(false);
 
     if (result.success) {
       toast.success(result.message);
       setOpen(false);
       router.refresh();
-    } else {
-      toast.error(result.message);
+      return;
     }
-  }
 
-  const defaultDate = new Date(data.eventDate).toISOString().split("T")[0];
+    toast.error(result.message);
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button
-          onClick={(e) => e.stopPropagation()}
-          className="p-1.5 text-white/80 hover:text-white hover:bg-white/20 rounded-md transition-colors"
-        >
+        <button className="p-1.5 text-white/80 hover:text-white hover:bg-white/20 rounded-md transition-colors">
           <Pencil className="w-4 h-4" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+
+      <DialogContent className="sm:max-w-[425px] bg-background/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Info Foto</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil className="w-5 h-5 text-primary" />
+            Edit Info Foto
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <Type className="w-3 h-3" /> Judul Kegiatan
             </Label>
-            <Input name="title" defaultValue={data.title} required />
+            <Input
+              name="title"
+              defaultValue={data.title}
+              placeholder="Contoh: Kunjungan Industri"
+              required
+              className="bg-muted/30"
+            />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <AlignLeft className="w-3 h-3" /> Deskripsi
             </Label>
-            <textarea
+            <Textarea
               name="description"
               defaultValue={data.description || ""}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="min-h-[100px] bg-muted/30"
+              placeholder="Ceritakan tentang foto ini..."
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
-              <Calendar className="w-3 h-3" /> Tanggal
+              <Calendar className="w-3 h-3" /> Tanggal Kejadian
             </Label>
             <Input
               type="date"
               name="eventDate"
-              defaultValue={defaultDate}
               required
+              defaultValue={
+                new Date(data.eventDate).toISOString().split("T")[0]
+              }
+              className="bg-muted/30"
             />
           </div>
 
-          <DialogFooter>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600">
+          <DialogFooter className="pt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setOpen(false)}
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 "Simpan Perubahan"
               )}
@@ -100,3 +129,5 @@ export function EditGalleryDialog({ data }: { data: Gallery }) {
     </Dialog>
   );
 }
+
+export default EditGalleryDialog;

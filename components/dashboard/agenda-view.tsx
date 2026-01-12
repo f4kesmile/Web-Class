@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { deleteAgenda } from "@/actions/agenda";
 import { cn } from "@/lib/utils";
-import { EditAgendaDialog } from "./edit-agenda-dialog";
+import EditAgendaDialog from "./edit-agenda-dialog";
 import { Agenda } from "@prisma/client";
 
 import {
@@ -83,8 +83,8 @@ export function AgendaView({ initialData, isAdmin }: AgendaViewProps) {
             className={cn(
               "px-4 py-2 rounded-full text-sm font-medium transition-all border",
               filter === tab.id
-                ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20"
-                : "bg-background border-border text-muted-foreground hover:border-blue-600/50 hover:text-foreground"
+                ? "bg-primary border-zinc-600 text-white shadow-md shadow-zinc-500/20"
+                : "bg-background border-border text-muted-foreground hover:border-zinc-600/50 hover:text-foreground"
             )}
           >
             {tab.label}
@@ -152,7 +152,7 @@ function AgendaCard({
       case "EVENT":
         return "text-amber-500 bg-amber-500/10 border-amber-500/20";
       default:
-        return "text-blue-600 bg-blue-500/10 border-blue-500/20";
+        return "text-primary bg-zinc-500/10 border-zinc-500/20";
     }
   };
   const typeLabel =
@@ -178,7 +178,7 @@ function AgendaCard({
         exit={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
         className={cn(
-          "group relative flex flex-col p-5 rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-blue-500/30",
+          "group relative flex flex-col p-5 rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-zinc-500/30",
           isCompleted ? "opacity-60 grayscale-[0.5]" : "opacity-100"
         )}
       >
@@ -196,7 +196,7 @@ function AgendaCard({
             <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200">
               <button
                 onClick={() => setShowEdit(true)}
-                className="p-1.5 text-muted-foreground/50 hover:text-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 rounded-md transition-all"
+                className="p-1.5 text-muted-foreground/50 hover:text-zinc-600 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 rounded-md transition-all"
               >
                 <Pencil className="w-4 h-4" />
               </button>
@@ -233,7 +233,7 @@ function AgendaCard({
         <div className="flex-1 space-y-2">
           <h3
             className={cn(
-              "font-bold text-lg leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
+              "font-bold text-lg leading-tight group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors",
               isCompleted && "line-through text-muted-foreground"
             )}
           >

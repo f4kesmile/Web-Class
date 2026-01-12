@@ -110,7 +110,7 @@ function GalleryCard({ data, isAdmin, index, onDelete }: GalleryCardProps) {
                 <AlertDialogTrigger asChild>
                   <button
                     onClick={(e) => e.stopPropagation()}
-                    className="p-1.5 text-white/80 hover:text-red-400 hover:bg-white/20 rounded-md transition-colors"
+                    className="p-1.5 text-white/80 hover:text-destructive hover:bg-destructive/10 hover:bg-white/20 rounded-md transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -131,7 +131,7 @@ function GalleryCard({ data, isAdmin, index, onDelete }: GalleryCardProps) {
                         e.stopPropagation();
                         onDelete();
                       }}
-                      className="bg-red-600 hover:bg-red-700 text-white"
+                      className="bg-destructive hover:bg-destructive/90 text-white"
                     >
                       Ya, Hapus
                     </AlertDialogAction>

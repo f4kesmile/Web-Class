@@ -27,7 +27,7 @@ import {
 import { upsertOfficer } from "@/actions/officer";
 
 interface AddOfficerDialogProps {
-  users: { id: string; name: string; email: string }[]; // Data user untuk dropdown
+  users: { id: string; name: string; email: string }[];
 }
 
 export function AddOfficerDialog({ users }: AddOfficerDialogProps) {
@@ -48,24 +48,25 @@ export function AddOfficerDialog({ users }: AddOfficerDialogProps) {
       toast.success(result.message);
       setOpen(false);
       router.refresh();
-    } else {
-      toast.error(result.message);
+      return;
     }
+
+    toast.error(result.message);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-lg shadow-blue-500/20">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-lg shadow-primary/10">
           <UserPlus className="w-4 h-4" />
           <span className="hidden sm:inline">Kelola Pengurus</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px] border-none shadow-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md">
+      <DialogContent className="sm:max-w-[425px] bg-background/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-blue-500" />
+            <UserPlus className="w-5 h-5 text-primary" />
             Angkat Pengurus
           </DialogTitle>
           <DialogDescription>
@@ -74,11 +75,11 @@ export function AddOfficerDialog({ users }: AddOfficerDialogProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Pilih Siswa */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <User className="w-3 h-3" /> Pilih Siswa
             </Label>
+
             <Select name="userId" required>
               <SelectTrigger className="bg-muted/30">
                 <SelectValue placeholder="Cari nama siswa..." />
@@ -99,7 +100,6 @@ export function AddOfficerDialog({ users }: AddOfficerDialogProps) {
             </Select>
           </div>
 
-          {/* Jabatan */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <Medal className="w-3 h-3" /> Jabatan
@@ -112,7 +112,6 @@ export function AddOfficerDialog({ users }: AddOfficerDialogProps) {
             />
           </div>
 
-          {/* Urutan Tampilan */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <ArrowUp className="w-3 h-3" /> Urutan Tampilan
@@ -126,7 +125,7 @@ export function AddOfficerDialog({ users }: AddOfficerDialogProps) {
               className="bg-muted/30"
             />
             <p className="text-[10px] text-muted-foreground">
-              *Angka kecil (1, 2, 3) akan muncul paling atas/depan.
+              Angka kecil (1, 2, 3) akan muncul paling atas/depan.
             </p>
           </div>
 
@@ -141,7 +140,7 @@ export function AddOfficerDialog({ users }: AddOfficerDialogProps) {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -156,3 +155,5 @@ export function AddOfficerDialog({ users }: AddOfficerDialogProps) {
     </Dialog>
   );
 }
+
+export default AddOfficerDialog;

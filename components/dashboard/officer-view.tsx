@@ -99,10 +99,12 @@ function TreeOfficerCard({ data, isAdmin, onDelete }: TreeOfficerCardProps) {
 
   const getIcon = (order: number) => {
     if (order === 1)
-      return <Crown className="w-4 h-4 text-yellow-500 fill-yellow-500" />;
+      return <Crown className="w-4 h-4 text-primary fill-primary" />;
     if (order === 2)
-      return <Medal className="w-4 h-4 text-slate-400 fill-slate-400" />;
-    return <User className="w-3 h-3 text-blue-600" />;
+      return (
+        <Medal className="w-4 h-4 text-muted-foreground fill-muted-foreground" />
+      );
+    return <User className="w-3 h-3 text-muted-foreground" />;
   };
 
   return (
@@ -111,8 +113,8 @@ function TreeOfficerCard({ data, isAdmin, onDelete }: TreeOfficerCardProps) {
       whileInView={{ opacity: 1, scale: 1, y: 0 }}
       viewport={{ once: true }}
       className={cn(
-        "relative group flex flex-col items-center bg-card border rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-500/30",
-        isLeader ? "p-6 w-64 border-yellow-500/30 bg-yellow-500/5" : "p-4 w-48"
+        "relative group flex flex-col items-center bg-card border rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/20",
+        isLeader ? "p-6 w-64 border-primary/25 bg-primary/5" : "p-4 w-48"
       )}
     >
       {isAdmin && (
@@ -124,7 +126,8 @@ function TreeOfficerCard({ data, isAdmin, onDelete }: TreeOfficerCardProps) {
           <div className="absolute top-2 right-2 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <button className="p-1.5 text-muted-foreground/50 hover:text-red-500 hover:bg-red-50/50 rounded-md transition-all">
+                <button className="p-1.5 text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 rounded-md transition">
+                  {" "}
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </AlertDialogTrigger>
@@ -137,10 +140,7 @@ function TreeOfficerCard({ data, isAdmin, onDelete }: TreeOfficerCardProps) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={onDelete}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
+                  <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                     Ya, Berhentikan
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -153,7 +153,7 @@ function TreeOfficerCard({ data, isAdmin, onDelete }: TreeOfficerCardProps) {
       <div className="relative mb-3">
         <Avatar
           className={cn(
-            "border-4 border-background shadow-md group-hover:border-blue-50 dark:group-hover:border-blue-900/30 transition-colors",
+            "border-4 border-background shadow-md group-hover:border-zinc-50 dark:group-hover:border-zinc-900/30 transition-colors",
             isLeader ? "w-20 h-20" : "w-14 h-14"
           )}
         >
@@ -170,7 +170,7 @@ function TreeOfficerCard({ data, isAdmin, onDelete }: TreeOfficerCardProps) {
       <div className="text-center w-full">
         <h3
           className={cn(
-            "font-bold text-foreground truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
+            "font-bold text-foreground truncate group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors",
             isLeader ? "text-lg" : "text-sm"
           )}
         >
@@ -185,7 +185,7 @@ function TreeOfficerCard({ data, isAdmin, onDelete }: TreeOfficerCardProps) {
           {data.position}
         </p>
       </div>
-      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-border/50 group-hover:bg-blue-500/50 transition-colors"></div>
+      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-border/50 group-hover:bg-primary/30 transition-colors"></div>
     </motion.div>
   );
 }

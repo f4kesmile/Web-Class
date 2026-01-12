@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea"; // Pastikan punya komponen textarea
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -52,24 +52,25 @@ export function CreateAgendaDialog() {
       toast.success(result.message);
       setOpen(false);
       router.refresh();
-    } else {
-      toast.error(result.message);
+      return;
     }
+
+    toast.error(result.message);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-lg shadow-blue-500/20">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-lg shadow-primary/10">
           <Plus className="w-4 h-4" />
           <span className="hidden sm:inline">Buat Agenda</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[500px] border-none shadow-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md">
+      <DialogContent className="sm:max-w-[500px] bg-background/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-500" />
+            <FileText className="w-5 h-5 text-primary" />
             Agenda Baru
           </DialogTitle>
           <DialogDescription>
@@ -78,7 +79,6 @@ export function CreateAgendaDialog() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Judul */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground">
               Judul Agenda
@@ -91,7 +91,6 @@ export function CreateAgendaDialog() {
             />
           </div>
 
-          {/* Mata Pelajaran & Tipe (Grid) */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase text-muted-foreground">
@@ -121,7 +120,6 @@ export function CreateAgendaDialog() {
             </div>
           </div>
 
-          {/* Deadline */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <Calendar className="w-3 h-3" /> Tenggat Waktu
@@ -134,7 +132,6 @@ export function CreateAgendaDialog() {
             />
           </div>
 
-          {/* Deskripsi */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-1">
               <AlignLeft className="w-3 h-3" /> Deskripsi
@@ -157,7 +154,7 @@ export function CreateAgendaDialog() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -172,3 +169,5 @@ export function CreateAgendaDialog() {
     </Dialog>
   );
 }
+
+export default CreateAgendaDialog;

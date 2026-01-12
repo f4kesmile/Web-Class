@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { upsertOfficer } from "@/actions/officer";
 import { Officer, User } from "@prisma/client";
+import { cn } from "@/lib/utils";
 
 interface EditOfficerDialogProps {
   data: Officer & { user: Pick<User, "name" | "email" | "image"> };
@@ -39,31 +40,38 @@ export function EditOfficerDialog({ data }: EditOfficerDialogProps) {
       toast.success("Jabatan diperbarui!");
       setOpen(false);
       router.refresh();
-    } else {
-      toast.error(result?.message || "Gagal memperbarui");
+      return;
     }
+
+    toast.error(result?.message || "Gagal memperbarui");
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          className="p-1.5 text-muted-foreground/50 hover:text-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 rounded-md transition-all"
+          className={cn(
+            "p-1.5 rounded-md transition",
+            "text-muted-foreground/60 hover:text-foreground",
+            "hover:bg-muted/50"
+          )}
           title="Edit Jabatan"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+
+      <DialogContent className="sm:max-w-[425px] bg-background/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Pengurus</DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input type="hidden" name="userId" value={data.userId} />
 
           <div className="space-y-2">
             <Label>Nama Siswa</Label>
-            <Input value={data.user.name} disabled className="bg-muted" />
+            <Input value={data.user.name} disabled className="bg-muted/40" />
           </div>
 
           <div className="space-y-2">
@@ -83,7 +91,7 @@ export function EditOfficerDialog({ data }: EditOfficerDialogProps) {
               defaultValue={data.displayOrder}
               required
             />
-            <div className="text-[10px] text-muted-foreground space-y-1 bg-muted/50 p-2 rounded-md">
+            <div className="text-[10px] text-muted-foreground space-y-1 bg-muted/40 p-2 rounded-md">
               <p>
                 • <strong>1</strong> = Ketua
               </p>
@@ -100,7 +108,7 @@ export function EditOfficerDialog({ data }: EditOfficerDialogProps) {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -114,3 +122,5 @@ export function EditOfficerDialog({ data }: EditOfficerDialogProps) {
     </Dialog>
   );
 }
+
+export default EditOfficerDialog;

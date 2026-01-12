@@ -51,9 +51,7 @@ export function AddImageDialog() {
 
   const handleRemoveImage = () => {
     setPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -77,24 +75,25 @@ export function AddImageDialog() {
       setOpen(false);
       setPreview(null);
       router.refresh();
-    } else {
-      toast.error(result.message);
+      return;
     }
+
+    toast.error(result.message);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-lg shadow-blue-500/20">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-lg shadow-primary/10">
           <ImagePlus className="w-4 h-4" />
           <span className="hidden sm:inline">Tambah Foto</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px] border-none shadow-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md">
+      <DialogContent className="sm:max-w-[425px] bg-background/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ImagePlus className="w-5 h-5 text-blue-500" />
+            <ImagePlus className="w-5 h-5 text-primary" />
             Upload Foto
           </DialogTitle>
           <DialogDescription>
@@ -120,7 +119,7 @@ export function AddImageDialog() {
             {!preview ? (
               <label
                 htmlFor="file-upload"
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer hover:bg-muted/50 transition-colors border-muted-foreground/25"
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer hover:bg-muted/40 transition-colors border-muted-foreground/25"
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
@@ -139,7 +138,7 @@ export function AddImageDialog() {
                 <button
                   type="button"
                   onClick={handleRemoveImage}
-                  className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"
+                  className="absolute top-2 right-2 p-1 bg-background/60 backdrop-blur text-foreground rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -194,7 +193,7 @@ export function AddImageDialog() {
             <Button
               type="submit"
               disabled={isLoading || !preview}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -209,3 +208,5 @@ export function AddImageDialog() {
     </Dialog>
   );
 }
+
+export default AddImageDialog;
