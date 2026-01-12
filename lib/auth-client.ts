@@ -28,6 +28,6 @@ export const {
   signUp, 
   useSession, 
   signOut, 
-  forgetPassword,
+  requestPasswordReset,
   resetPassword
 } = client;

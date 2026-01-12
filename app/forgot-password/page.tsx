@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { forgetPassword } from "@/lib/auth-client";
+import { requestPasswordReset } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Mail, ArrowLeft, KeyRound, CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "@/components/auth/auth-layout";
-import { toast } from "sonner"; // 1. Import Toast
+import { toast } from "sonner";
 
 interface ErrorContext {
   error: {
@@ -29,10 +29,10 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
 
-    await forgetPassword(
+    await requestPasswordReset(
       {
         email,
-        redirectTo: "/reset-password", // Pastikan route ini nanti ada di app folder
+        redirectTo: "/reset-password",
       },
       {
         onSuccess: () => {
@@ -40,7 +40,6 @@ export default function ForgotPasswordPage() {
           setIsSubmitted(true);
         },
         onError: (ctx: ErrorContext) => {
-          // Ganti alert dengan toast error
           toast.error(ctx.error.message || "Gagal mengirim email.");
         },
       }
