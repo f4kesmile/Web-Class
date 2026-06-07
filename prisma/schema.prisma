@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 enum Role {
@@ -34,7 +34,7 @@ model User {
   name          String
   email         String  @unique
   emailVerified Boolean
-  image         String? @db.LongText
+  image         String? @db.Text
   role          Role    @default(USER)
   isBanned      Boolean @default(false)
 
@@ -153,7 +153,7 @@ model Gallery {
   id          String   @id @default(cuid())
   title       String   @default("Kegiatan Kelas")
   description String?  @db.Text
-  imageUrl    String   @db.LongText
+  imageUrl    String   @db.Text
   eventDate   DateTime @default(now())
 
   createdAt DateTime @default(now())

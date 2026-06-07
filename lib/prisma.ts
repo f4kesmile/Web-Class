@@ -1,9 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { neonConfig } from "@neondatabase/serverless";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import ws from "ws";
+
+neonConfig.webSocketConstructor = ws;
 
 declare global {
   var prisma: PrismaClient | undefined;
-  var prismaAdapter: PrismaMariaDb | undefined;
 }
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -11,8 +14,7 @@ if (!databaseUrl) {
   throw new Error("DATABASE_URL is not set");
 }
 
-const adapter =
-  globalThis.prismaAdapter ?? new PrismaMariaDb(databaseUrl);
+const adapter = new PrismaNeon({ connectionString: databaseUrl });
 
 export const prisma =
   globalThis.prisma ??
@@ -22,5 +24,4 @@ export const prisma =
 
 if (process.env.NODE_ENV !== "production") {
   globalThis.prisma = prisma;
-  globalThis.prismaAdapter = adapter;
 }
